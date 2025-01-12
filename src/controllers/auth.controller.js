@@ -29,7 +29,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
 const completeRegistration = asyncHandler(async (req, res) => {
   try {
     console.log("On complete registration");
-    const { email, username, password,role } = req.body;
+    const { email, username, password, role } = req.body;
     if (
       ![email, username, password].every(
         (field) => typeof field === "string" && field.trim() !== ""
@@ -48,7 +48,7 @@ const completeRegistration = asyncHandler(async (req, res) => {
         username,
         email,
         password,
-        role
+        role,
       });
       // updatedUser.password=null;
       // updatedUser.refreshToken=null;
@@ -92,66 +92,71 @@ const LoginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   console.log("email from login User:", email);
   if (!email) {
-    throw new ApiError("Email is required");
+    throw new ApiError(400,"Email is required");
   }
 
-  //find user by  email
-  const user = await User.findOne({
-    email,
-  });
+  try {
+    //find user by  email
+    const user = await User.findOne({
+      email,
+    });
 
-  console.log("user:", user);
-  if (!user) {
-    throw new ApiError(400, "User with this email doesn't exists");
+    console.log("user:", user);
+    if (!user) {
+      throw new ApiError(400, "User with this email doesn't exists");
+    }
+
+    //check password
+    console.log("Password:", password); //simplestring-nonincrepted
+    const isPasswordValid = await user.isPasswordCorrect(password); //????why small user and not Capital->we need the upper instance so,
+    if (!isPasswordValid) {
+      throw new ApiError(400, "Incorrect password");
+    }
+
+    //to send data without password and refreshToken
+    let apiResultUser;
+    apiResultUser = await User.findOne({
+      email,
+    })
+      .select("-password -refreshToken")
+      .lean(); //lean method  instruct Mongoose to return a plain JavaScript object instead of a Mongoose document. This can be beneficial in terms of performance because it reduces the processing overhead associated with Mongoose documents.
+    // When to Use lean()
+
+    //Generate  Access and refresh token
+    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
+      user._id
+    ); //id from the instance of the trying to  login account
+    //access and refreshToken are generated everytime user logs in and refreshToken is deleted from database during logout
+
+    // const loggedInUser=User.findById(user._id).select(  //don't get password and refresh token from database
+    //     "-password -refreshToken"
+    // ).lean();    //.lean()??? Why to use it here??
+
+    //send cookie
+    const options = {
+      //only modifyable by server not by browser by anyone
+      httpOnly: false,
+      secure: true,
+    };
+
+    return res //cookieParser middleware added hence res object got cookie property
+      .status(200)
+      .cookie("accessToken", accessToken, options) //accessToken Cookie
+      .cookie("refreshToken", refreshToken, options) //refreshToken Cookie
+      .json(
+        new ApiResponse(
+          200,
+
+          //  user:loggedInUser,accessToken,refreshToken  //????{} missing-> sending multiple at a time???
+          apiResultUser,
+
+          "User logged in successfully"
+        )
+      );
+  } catch (error) {
+    console.log(`Error somewhere at complete registration: ${error}`);
+    throw new ApiError(500, `Error logging user in`);
   }
-
-  //check password
-  console.log("Password:", password); //simplestring-nonincrepted
-  const isPasswordValid = await user.isPasswordCorrect(password); //????why small user and not Capital->we need the upper instance so,
-  if (!isPasswordValid) {
-    throw new ApiError(400, "Incorrect password");
-  }
-
-  //to send data without password and refreshToken
-  let apiResultUser;
-  apiResultUser = await User.findOne({
-    email,
-  })
-    .select("-password -refreshToken")
-    .lean(); //lean method  instruct Mongoose to return a plain JavaScript object instead of a Mongoose document. This can be beneficial in terms of performance because it reduces the processing overhead associated with Mongoose documents.
-  // When to Use lean()
-
-  //Generate  Access and refresh token
-  const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
-    user._id
-  ); //id from the instance of the trying to  login account
-  //access and refreshToken are generated everytime user logs in and refreshToken is deleted from database during logout
-
-  // const loggedInUser=User.findById(user._id).select(  //don't get password and refresh token from database
-  //     "-password -refreshToken"
-  // ).lean();    //.lean()??? Why to use it here??
-
-  //send cookie
-  const options = {
-    //only modifyable by server not by browser by anyone
-    httpOnly: false,
-    secure: true,
-  };
-
-  return res //cookieParser middleware added hence res object got cookie property
-    .status(200)
-    .cookie("accessToken", accessToken, options) //accessToken Cookie
-    .cookie("refreshToken", refreshToken, options) //refreshToken Cookie
-    .json(
-      new ApiResponse(
-        200,
-
-        //  user:loggedInUser,accessToken,refreshToken  //????{} missing-> sending multiple at a time???
-        apiResultUser,
-
-        "User logged in successfully"
-      )
-    );
 });
 
 const LogoutUser = asyncHandler((req, res) => {
