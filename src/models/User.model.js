@@ -3,17 +3,25 @@ import  jwt  from "jsonwebtoken";
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 import bcrypt from "bcrypt"
 const userSchema=new Schema({
-    firstName:{
+    // firstName:{
+    //     type:String,
+    //     required:true,
+    //     trim:true,
+    //     index:true, //makes optimised for searching  username
+    // },
+    // lastName:{
+    //     type:String,
+    //     required:true,
+    //     trim:true,
+    //     index:true, //makes optimised for searching  username
+    // },
+    
+    username:{
         type:String,
         required:true,
         trim:true,
         index:true, //makes optimised for searching  username
-    },
-    lastName:{
-        type:String,
-        required:true,
-        trim:true,
-        index:true, //makes optimised for searching  username
+        unique:true
     },
     email:{
         type:String,

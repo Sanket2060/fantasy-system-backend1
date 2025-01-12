@@ -29,26 +29,24 @@ const generateAccessAndRefreshTokens = async (userId) => {
 const completeRegistration = asyncHandler(async (req, res) => {
   try {
     console.log("On complete registration");
-    const { firstName, lastName, email, mobile, password } = req.body;
+    const { email, username, password } = req.body;
     if (
-      ![firstName, lastName, email, mobile, password].every(
+      ![email, username, password].every(
         (field) => typeof field === "string" && field.trim() !== ""
       )
     ) {
       throw new ApiError(400, "All fields are required");
     }
 
-    const existedUser = await User.findOne({ $or: [{ email }, { mobile }] });
+    const existedUser = await User.findOne({ $or: [{ email }, { username }] });
     if (existedUser) {
-      throw new ApiError(401, "Email or mobile has already been taken");
+      throw new ApiError(401, "Email or username has already been taken");
     }
     let updatedUser;
     try {
       updatedUser = await User.create({
-        firstName,
-        lastName,
+        username,
         email,
-        mobile,
         password,
       });
       // updatedUser.password=null;
@@ -78,7 +76,7 @@ const completeRegistration = asyncHandler(async (req, res) => {
       .status(200)
       .cookie("accessToken", accessToken, options)
       .cookie("refreshToken", refreshToken, options)
-      .json(new ApiResponse(200,finalUser, "User  created successfully"));
+      .json(new ApiResponse(200, finalUser, "User  created successfully"));
   } catch (error) {
     console.log(`Error somewhere at complete registration: ${error}`);
     throw new ApiError(
@@ -115,13 +113,12 @@ const LoginUser = asyncHandler(async (req, res) => {
 
   //to send data without password and refreshToken
   let apiResultUser;
-  apiResultUser =
-    (await User.findOne({
-      email,
-    })
-      .select("-password -refreshToken")
-      .lean());      //lean method  instruct Mongoose to return a plain JavaScript object instead of a Mongoose document. This can be beneficial in terms of performance because it reduces the processing overhead associated with Mongoose documents.
-      // When to Use lean()
+  apiResultUser = await User.findOne({
+    email,
+  })
+    .select("-password -refreshToken")
+    .lean(); //lean method  instruct Mongoose to return a plain JavaScript object instead of a Mongoose document. This can be beneficial in terms of performance because it reduces the processing overhead associated with Mongoose documents.
+  // When to Use lean()
 
   //Generate  Access and refresh token
   const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
@@ -182,14 +179,11 @@ const LogoutUser = asyncHandler((req, res) => {
     .json(new ApiResponse(200, {}, "User logged out sucessfully"));
 });
 
-const getUserDetails=asyncHandler((req,res)=>{
-  const user=req.user;
-  res.
-  status(200)
-  .json(
-   new ApiResponse(200,user,"User data retrieved sucessfully")
-  )
-  
-})
+const getUserDetails = asyncHandler((req, res) => {
+  const user = req.user;
+  res
+    .status(200)
+    .json(new ApiResponse(200, user, "User data retrieved sucessfully"));
+});
 
-export { completeRegistration, LoginUser, LogoutUser,getUserDetails };
+export { completeRegistration, LoginUser, LogoutUser, getUserDetails };
