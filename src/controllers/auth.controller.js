@@ -29,7 +29,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
 const completeRegistration = asyncHandler(async (req, res) => {
   try {
     console.log("On complete registration");
-    const { email, username, password } = req.body;
+    const { email, username, password,role } = req.body;
     if (
       ![email, username, password].every(
         (field) => typeof field === "string" && field.trim() !== ""
@@ -48,6 +48,7 @@ const completeRegistration = asyncHandler(async (req, res) => {
         username,
         email,
         password,
+        role
       });
       // updatedUser.password=null;
       // updatedUser.refreshToken=null;

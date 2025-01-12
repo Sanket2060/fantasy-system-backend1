@@ -18,5 +18,9 @@ app.use(express.urlencoded({limit:"16kb",extended:true}))
 import userRouter from './routes/User.routes.js'
 app.use('/api/v1/users',userRouter)  //reach to users route on /users
 //url:https//:localhost:9005/api/v1/users/register
+import playerRoutes from './routes/Player.route.js'
+app.use('/api/players', playerRoutes);
+import tournamentRoutes from './routes/Tournament.route.js'
+app.use('/api/tournaments', tournamentRoutes);
 
 export {app}

@@ -1,8 +1,9 @@
 import mongoose, { Schema } from "mongoose";
-import  jwt  from "jsonwebtoken"; 
+import jwt from "jsonwebtoken";
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
-import bcrypt from "bcrypt"
-const userSchema=new Schema({
+import bcrypt from "bcrypt";
+const userSchema = new Schema(
+  {
     // firstName:{
     //     type:String,
     //     required:true,
@@ -15,77 +16,79 @@ const userSchema=new Schema({
     //     trim:true,
     //     index:true, //makes optimised for searching  username
     // },
-    
-    username:{
-        type:String,
-        required:true,
-        trim:true,
-        index:true, //makes optimised for searching  username
-        unique:true
+
+    username: {
+      type: String,
+      required: true,
+      trim: true,
+      index: true, //makes optimised for searching  username
+      unique: true,
     },
-    email:{
-        type:String,
-        required:true,
-        unique:true,
-        lowercase:true,
-        trim:true,
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
     },
-    
-    password:{
-        type:String,
-        required:[true,'Password is required']  //custom error message for true fields
+
+    password: {
+      type: String,
+      required: [true, "Password is required"], //custom error message for true fields
     },
-    refreshToken:{
-        type:String
+    refreshToken: {
+      type: String,
     },
-    mobile:{
-        type:Number,
-        unique:true,
-        trim:true,
+    // mobile: {
+    //   type: Number,
+    //   unique: true,
+    //   trim: true,
+    // },
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
     },
-},{timestamps:true})
+  },
+  { timestamps: true }
+);
 
-userSchema.pre("save",async function(next){      
-    if (!this.isModified("password")) return next(); 
-    this.password=await bcrypt.hash(this.password,10);   
-    console.log("Encrypted password:",this.password);
-    next();                                               
-})
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  this.password = await bcrypt.hash(this.password, 10);
+  console.log("Encrypted password:", this.password);
+  next();
+});
 
-userSchema.methods.isPasswordCorrect = async function(password){  //custom methods to schema
-       return   await  bcrypt.compare(password,this.password);  //this
-}
-userSchema.methods.generateAccessToken=function(){
-    return jwt.sign(
-        {
-            _id:this._id,   //payload or data
+userSchema.methods.isPasswordCorrect = async function (password) {
+  //custom methods to schema
+  return await bcrypt.compare(password, this.password); //this
+};
+userSchema.methods.generateAccessToken = function () {
+  return jwt.sign(
+    {
+      _id: this._id, //payload or data
 
-            email:this.email,
-            username:this.username,
-            name:this.name
+      email: this.email,
+      username: this.username,
+      name: this.name,
+    },
+    process.env.ACCESS_TOKEN_SECRET, //secret
+    {
+      expiresIn: process.env.ACCESS_TOKEN_EXPIRY, //expiry
+    }
+  );
+};
 
-        },
-        process.env.ACCESS_TOKEN_SECRET,  //secret
-        {
-            expiresIn:process.env.ACCESS_TOKEN_EXPIRY  //expiry
-        }
-
-    )
-
-}
-
-userSchema.methods.generateRefreshToken=function(){
-    return jwt.sign(
-        {
-            _id:this._id,   //payload or data
-        },
-        process.env.REFRESH_TOKEN_SECRET,  //secret
-        {
-            expiresIn:process.env.REFRESH_TOKEN_EXPIRY  //expiry
-        }
-
-    )
-
-}
-export const User=mongoose.model("User",userSchema);
-
+userSchema.methods.generateRefreshToken = function () {
+  return jwt.sign(
+    {
+      _id: this._id, //payload or data
+    },
+    process.env.REFRESH_TOKEN_SECRET, //secret
+    {
+      expiresIn: process.env.REFRESH_TOKEN_EXPIRY, //expiry
+    }
+  );
+};
+export const User = mongoose.model("User", userSchema);

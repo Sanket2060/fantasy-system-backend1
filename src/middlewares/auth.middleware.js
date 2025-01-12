@@ -31,3 +31,10 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
     throw new ApiError(500, "Can't validate from access token at the moment");
   }
 });
+// Middleware to check if the user has admin role
+export const authorizeAdmin = (req, res, next) => {
+  if (req.user.role !== 'admin') {
+      return res.status(403).send({ error: 'Access denied. Admins only.' });
+  }
+  next();
+};

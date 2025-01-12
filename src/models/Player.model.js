@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import matchSchema from "./Match.js";
+import matchSchema from "./Match.model.js";
 const { Schema } = mongoose;
 
 const playerSchema = new Schema({
