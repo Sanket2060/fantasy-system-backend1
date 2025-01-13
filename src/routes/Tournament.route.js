@@ -1,7 +1,7 @@
 import express from "express";
 import Tournament from "../models/Tournament.model.js";
 import { verifyJWT, authorizeAdmin } from "../middlewares/auth.middleware.js";
-import { addNewTournament } from "../controllers/tournament.conroller.js";
+import { addNewTournament } from "../controllers/tournament.controller.js";
 
 const router = express.Router();
 

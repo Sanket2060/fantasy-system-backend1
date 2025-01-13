@@ -20,6 +20,11 @@ const playerSchema = new Schema({
     ref: "Tournament",
     required: true,
   },
+  franchise: {
+    type: Schema.Types.ObjectId,
+    ref: "Franchise",
+    required: true,
+  },
   matches: [matchSchema], // Include an array of matches
 });
 
