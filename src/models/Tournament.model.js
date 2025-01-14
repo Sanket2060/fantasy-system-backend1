@@ -20,6 +20,12 @@ const tournamentSchema = new Schema({
       ref: "Team",
     },
   ],
+  franchises: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Franchise",
+    },
+  ],
 });
 
 const Tournament = mongoose.model("Tournament", tournamentSchema);

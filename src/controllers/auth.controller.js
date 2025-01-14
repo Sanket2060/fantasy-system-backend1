@@ -26,7 +26,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
   }
 };
 
-const completeRegistration = asyncHandler(async (req, res) => {
+const completeRegistration = asyncHandler(async (req, res) => {  //asyncHandler->provide extra try-catch to prevent app crashing
   try {
     console.log("On complete registration");
     const { email, username, password, role } = req.body;
