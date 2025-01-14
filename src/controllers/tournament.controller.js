@@ -2,8 +2,9 @@ import Tournament from "../models/Tournament.model.js";
 import Franchise from "../models/Franchise.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
+import { asyncHandler } from "../utils/AsyncHandler.js";
 
-export const addNewTournament = async (req, res) => {
+export const addNewTournament = asyncHandler(async (req, res) => {
   const { name, rules, registrationLimits, franchises } = req.body;
 
   try {
@@ -46,7 +47,9 @@ export const addNewTournament = async (req, res) => {
     await tournament.save();
 
     // Populate the tournament with its franchises
-    const foundTournament = await Tournament.findById(tournament._id);
+    const foundTournament = await Tournament.findById(tournament._id).select(
+      "-__v"
+    );
 
     res.status(201).json(new ApiResponse(201, foundTournament));
   } catch (error) {
@@ -62,4 +65,4 @@ export const addNewTournament = async (req, res) => {
         new ApiResponse(500, "Something went wrong while adding new tournament")
       );
   }
-};
+});
