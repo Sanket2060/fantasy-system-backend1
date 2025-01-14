@@ -14,10 +14,15 @@ export const addNewTournament = async (req, res) => {
     );
 
     if (duplicateFranchise) {
-      throw new ApiError(
-        400,
-        `Franchise name '${duplicateFranchise}' must be unique within the tournament`
-      );
+      res
+        .status(400)
+        .json(
+          new ApiResponse(
+            400,
+            {},
+            `Franchise name '${duplicateFranchise}' must be unique within the tournament`
+          )
+        );
     }
 
     // Create and save the tournament
@@ -45,7 +50,6 @@ export const addNewTournament = async (req, res) => {
 
     res.status(201).json(new ApiResponse(201, foundTournament));
   } catch (error) {
-    console.log("ERROR", error);
     if (error instanceof ApiError) {
       return res
         .status(error.statusCode)
