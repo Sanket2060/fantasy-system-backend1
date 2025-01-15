@@ -13,7 +13,7 @@ router.post(
   verifyJWT,
   authorizeAdmin,
   asyncHandler(async (req, res) => {
-    const { name, price, photo, tournamentId, matches, franchiseId } = req.body;
+    const { name, price, photo, tournamentId, matches, franchiseId,playerType } = req.body;
 
     try {
       const franchise = await Franchise.findById(franchiseId);
@@ -42,10 +42,12 @@ router.post(
         tournamentId,
         franchise: franchiseId,
         matches,
+        playerType
       });
       await player.save();
       res.status(201).send(player);
     } catch (error) {
+      console.log("Error while adding new player", error.message);
       return res
         .status(500)
         .json(
@@ -97,6 +99,38 @@ router.patch(
         );
     }
   }
+);
+
+// Route to retrieve players of a specific tournament with optional filters
+router.get(
+  "/:tournamentId/players",
+  verifyJWT,
+  asyncHandler(async (req, res) => {
+    const { tournamentId } = req.params;
+    const { franchiseId, playerType } = req.query;
+
+    try {
+      const query = { tournamentId };
+
+      if (franchiseId) {
+        query.franchise = franchiseId;
+      }
+
+      if (playerType) {
+        query.playerType = playerType;
+      }
+
+      const players = await Player.find(query).populate("franchise");
+
+      res.status(200).json(new ApiResponse(200, players));
+    } catch (error) {
+      throw new ApiError(
+        500,
+        "Something went wrong while retrieving players",
+        error.message
+      );
+    }
+  })
 );
 
 export default router;

@@ -6,7 +6,7 @@ const playerSchema = new Schema({
   name: {
     type: String,
     required: true,
-    unique:true
+    unique: true,
   },
   price: {
     type: Number,
@@ -27,6 +27,11 @@ const playerSchema = new Schema({
     required: true,
   },
   matches: [matchSchema], // Include an array of matches
+  playerType: {
+    type: String,
+    required: true,
+    enum: ["bowler", "batsman", "allrounder"], // Define the allowed values for playerType
+  },
 });
 
 const Player = mongoose.model("Player", playerSchema);

@@ -5,7 +5,8 @@ import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 
 export const addNewTournament = asyncHandler(async (req, res) => {
-  const { name, rules, registrationLimits, franchises } = req.body;
+  const { name, rules, registrationLimits, franchises, playerLimitPerTeam } =
+    req.body;
 
   try {
     // Check if franchise names are unique within the tournament
@@ -31,6 +32,7 @@ export const addNewTournament = asyncHandler(async (req, res) => {
       name,
       rules,
       registrationLimits,
+      playerLimitPerTeam,
     });
 
     // Create and save each franchise with reference to the tournament

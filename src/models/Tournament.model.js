@@ -26,6 +26,10 @@ const tournamentSchema = new Schema({
       ref: "Franchise",
     },
   ],
+  playerLimitPerTeam: {
+    type: Number,
+    required: true,
+  },
 });
 
 const Tournament = mongoose.model("Tournament", tournamentSchema);
