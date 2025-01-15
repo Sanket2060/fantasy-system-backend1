@@ -34,7 +34,7 @@ router.post(
       ) {
         throw new ApiError(
           400,
-          `Players array must contain ${requiredPlayersCount} unique player IDs`
+          `Team must contain ${requiredPlayersCount} unique players`
         );
       }
 
@@ -62,9 +62,12 @@ router.post(
         .json(new ApiResponse(201, team, "Team created successfully"));
     } catch (error) {
       console.error("Error creating the team for the user", error.message);
+      if (error instanceof ApiError) {
+        throw new ApiError(error.statusCode, error.message, error.message);
+      }
       throw new ApiError(
         500,
-        "Something went wrong while creating the team",
+        `Something went wrong while creating the team"${error.message}`,
         error.message
       );
     }
