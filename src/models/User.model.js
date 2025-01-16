@@ -2,26 +2,15 @@ import mongoose, { Schema } from "mongoose";
 import jwt from "jsonwebtoken";
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 import bcrypt from "bcrypt";
+
+// Define the schema for the User model
 const userSchema = new Schema(
   {
-    // firstName:{
-    //     type:String,
-    //     required:true,
-    //     trim:true,
-    //     index:true, //makes optimised for searching  username
-    // },
-    // lastName:{
-    //     type:String,
-    //     required:true,
-    //     trim:true,
-    //     index:true, //makes optimised for searching  username
-    // },
-
     username: {
       type: String,
       required: true,
       trim: true,
-      index: true, //makes optimised for searching  username
+      index: true, // Makes optimized for searching username
       unique: true,
     },
     email: {
@@ -31,28 +20,28 @@ const userSchema = new Schema(
       lowercase: true,
       trim: true,
     },
-
     password: {
       type: String,
-      required: [true, "Password is required"], //custom error message for true fields
+      required: [true, "Password is required"], // Custom error message for required fields
     },
     refreshToken: {
       type: String,
     },
-    // mobile: {
-    //   type: Number,
-    //   unique: true,
-    //   trim: true,
-    // },
     role: {
       type: String,
       enum: ["user", "admin"],
       default: "user",
     },
+    tickets: {
+      knockout: { type: Boolean, default: true },
+      semifinal: { type: Boolean, default: true },
+      final: { type: Boolean, default: true },
+    },
   },
   { timestamps: true }
 );
 
+// Pre-save hook to hash the password before saving
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 10);
@@ -60,34 +49,36 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+// Method to check if the provided password is correct
 userSchema.methods.isPasswordCorrect = async function (password) {
-  //custom methods to schema
-  return await bcrypt.compare(password, this.password); //this
+  return await bcrypt.compare(password, this.password);
 };
+
+// Method to generate an access token
 userSchema.methods.generateAccessToken = function () {
   return jwt.sign(
     {
-      _id: this._id, //payload or data
-
+      _id: this._id,
       email: this.email,
       username: this.username,
       name: this.name,
     },
-    process.env.ACCESS_TOKEN_SECRET, //secret
+    process.env.ACCESS_TOKEN_SECRET,
     {
-      expiresIn: process.env.ACCESS_TOKEN_EXPIRY, //expiry
+      expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
     }
   );
 };
 
+// Method to generate a refresh token
 userSchema.methods.generateRefreshToken = function () {
   return jwt.sign(
     {
-      _id: this._id, //payload or data
+      _id: this._id,
     },
-    process.env.REFRESH_TOKEN_SECRET, //secret
+    process.env.REFRESH_TOKEN_SECRET,
     {
-      expiresIn: process.env.REFRESH_TOKEN_EXPIRY, //expiry
+      expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
     }
   );
 };

@@ -30,6 +30,9 @@ const tournamentSchema = new Schema({
     type: Number,
     required: true,
   },
+  knockoutStart: { type: Date, required: true },
+  semifinalStart: { type: Date, required: true },
+  finalStart: { type: Date, required: true },
 });
 
 const Tournament = mongoose.model("Tournament", tournamentSchema);

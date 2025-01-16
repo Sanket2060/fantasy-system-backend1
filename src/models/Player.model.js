@@ -30,7 +30,7 @@ const playerSchema = new Schema({
   playerType: {
     type: String,
     required: true,
-    enum: ["bowler", "batsman", "allrounder"], // Define the allowed values for playerType
+    enum: ["goalkeeper", "defender", "midfielder", "forward"], // Define the allowed values for playerType
   },
 });
 

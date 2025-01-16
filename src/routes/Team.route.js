@@ -7,12 +7,14 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import Tournament from "../models/Tournament.model.js";
+import checkUpdateWindowAndConsumeTicket from '../middlewares/checkUpdateWindowAndConsumeTicket.js'
 
 const router = express.Router();
 // Route to create a new team
 router.post(
   "/create",
   verifyJWT,
+  // checkUpdateWindowAndConsumeTicket,
   asyncHandler(async (req, res) => {
     const { name, players, budget, tournamentId } = req.body;
     const userId = req.user._id; // Assuming user ID is available in req.user
