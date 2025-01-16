@@ -9,7 +9,6 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 import Tournament from "../models/Tournament.model.js";
 
 const router = express.Router();
-
 // Route to create a new team
 router.post(
   "/create",
@@ -19,7 +18,7 @@ router.post(
     const userId = req.user._id; // Assuming user ID is available in req.user
 
     try {
-      // Check if the players array has exactly 11 unique values
+      // Check if the players array has exactly the required number of unique values
       const tournament = await Tournament.findById(tournamentId);
       if (!tournament) {
         throw new ApiError(404, "Tournament not found");
@@ -38,10 +37,18 @@ router.post(
         );
       }
 
-      // Validate player IDs
+      // Validate player IDs and calculate total budget
       const validPlayers = await Player.find({ _id: { $in: players } });
       if (validPlayers.length !== players.length) {
         throw new ApiError(400, "One or more player IDs are invalid");
+      }
+
+      const totalBudget = validPlayers.reduce(
+        (acc, player) => acc + player.price,
+        0
+      );
+      if (totalBudget > 100) {
+        throw new ApiError(400, "Total budget of players exceeds 100");
       }
 
       // Create a new team using the create method
@@ -53,7 +60,6 @@ router.post(
       });
 
       // Find the relevant tournament and update its teams array
-
       tournament.teamDetails.push(team._id);
       await tournament.save();
 
@@ -67,7 +73,7 @@ router.post(
       }
       throw new ApiError(
         500,
-        `Something went wrong while creating the team"${error.message}`,
+        `Something went wrong while creating the team: ${error.message}`,
         error.message
       );
     }
@@ -132,6 +138,13 @@ router.put(
         );
       }
 
+      // Validate the total budget
+      const validPlayers = await Player.find({ _id: { $in: Array.from(updatedPlayers) } });
+      const totalBudget = validPlayers.reduce((acc, player) => acc + player.price, 0);
+      if (totalBudget > 100) {
+        throw new ApiError(400, "Total budget of players exceeds 100");
+      }
+
       // Update the team players
       team.players = Array.from(updatedPlayers);
       await team.save();
@@ -141,6 +154,9 @@ router.put(
         .json(new ApiResponse(200, team, "Team updated successfully"));
     } catch (error) {
       console.error("Error updating the team for the user", error.message);
+      if (error instanceof ApiError) {
+        throw new ApiError(error.statusCode, error.message, error.message);
+      }
       throw new ApiError(
         500,
         "Something went wrong while updating the team",
