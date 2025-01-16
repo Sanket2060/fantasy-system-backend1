@@ -14,7 +14,6 @@ const router = express.Router();
 router.post(
   "/create",
   verifyJWT,
-  // checkUpdateWindowAndConsumeTicket,
   asyncHandler(async (req, res) => {
     const { name, players, budget, tournamentId } = req.body;
     const userId = req.user._id; // Assuming user ID is available in req.user
@@ -86,6 +85,7 @@ router.post(
 router.put(
   "/:teamId",
   verifyJWT,
+  checkUpdateWindowAndConsumeTicket,
   asyncHandler(async (req, res) => {
     const { teamId } = req.params;
     const { addPlayers, removePlayers } = req.body;
