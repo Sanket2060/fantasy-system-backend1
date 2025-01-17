@@ -3,6 +3,7 @@ import Franchise from "../models/Franchise.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
+import mongoose from "mongoose";
 
 export const addNewTournament = asyncHandler(async (req, res) => {
   const {
@@ -14,23 +15,26 @@ export const addNewTournament = asyncHandler(async (req, res) => {
     knockoutStart,
     semifinalStart,
     finalStart,
-    createdBy
   } = req.body;
+  const userId = req.user._id;
+
+  if (
+    !name ||
+    !rules ||
+    !registrationLimits ||
+    !franchises ||
+    !playerLimitPerTeam ||
+    !knockoutStart ||
+    !semifinalStart ||
+    !finalStart
+  ) {
+    throw new ApiError(400, "All fields are required");
+  }
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
   try {
-    if (
-      !name ||
-      !rules ||
-      !registrationLimits ||
-      !franchises ||
-      !playerLimitPerTeam ||
-      !knockoutStart ||
-      !semifinalStart ||
-      !finalStart ||
-      !createdBy
-    ) {
-      throw new ApiError(400, "All fields are required");
-    }
     // Check if franchise names are unique within the tournament
     const franchiseNames = franchises.map((f) => f.name.toLowerCase());
     const duplicateFranchise = franchiseNames.find(
@@ -38,54 +42,67 @@ export const addNewTournament = asyncHandler(async (req, res) => {
     );
 
     if (duplicateFranchise) {
-      res
-        .status(400)
-        .json(
-          new ApiResponse(
-            400,
-            {},
-            `Franchise name '${duplicateFranchise}' must be unique within the tournament`
-          )
-        );
+      throw new ApiError(
+        400,
+        `Franchise name '${duplicateFranchise}' must be unique within the tournament`
+      );
     }
 
     // Create and save the tournament
-    const tournament = await Tournament.create({
-      name,
-      rules,
-      registrationLimits,
-      playerLimitPerTeam,
-      knockoutStart,
-      semifinalStart,
-      finalStart,
-      createdBy
-    });
+    const tournament = await Tournament.create(
+      [
+        {
+          name,
+          rules,
+          registrationLimits,
+          playerLimitPerTeam,
+          knockoutStart,
+          semifinalStart,
+          finalStart,
+          createdBy: userId,
+        },
+      ],
+      { session }
+    );
 
     // Create and save each franchise with reference to the tournament
     for (let franchiseData of franchises) {
-      const franchise = await Franchise.create({
-        ...franchiseData,
-        tournamentId: tournament._id,
-      });
+      const franchise = await Franchise.create(
+        [
+          {
+            ...franchiseData,
+            tournamentId: tournament[0]._id,
+          },
+        ],
+        { session }
+      );
       // Add the franchise ID to the tournament's franchises array
-      tournament.franchises.push(franchise._id);
+      tournament[0].franchises.push(franchise[0]._id);
     }
 
     // Save the updated tournament with franchise references
-    await tournament.save();
+    await tournament[0].save({ session });
+
+    // Commit the transaction
+    await session.commitTransaction();
+    session.endSession();
 
     // Populate the tournament with its franchises
-    const foundTournament = await Tournament.findById(tournament._id).select(
-      "-__v"
-    );
+    const foundTournament = await Tournament.findById(tournament[0]._id)
+      .populate("franchises")
+      .select("-__v");
 
     res.status(201).json(new ApiResponse(201, foundTournament));
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+
     if (error instanceof ApiError) {
       return res
         .status(error.statusCode)
         .json(new ApiResponse(error.statusCode, error.message));
     }
+
     console.error("Error at creating tournament", error);
     return res
       .status(500)
@@ -95,9 +112,8 @@ export const addNewTournament = asyncHandler(async (req, res) => {
   }
 });
 
-
 // Controller to retrieve tournaments based on user's ID
-export const getTournamentsByUserId = async (req, res, next) => {
+export const getTournamentsByUserId = asyncHandler(async (req, res) => {
   try {
     const userId = req.user._id; // Assuming req.user is populated with the authenticated user's details
 
@@ -105,14 +121,22 @@ export const getTournamentsByUserId = async (req, res, next) => {
       throw new ApiError(400, "User ID is required");
     }
 
-    const tournaments = await Tournament.find({ createdBy: userId }).populate('name rules registrationLimits playerLimitPerTeam knockoutStart');
+    const tournaments = await Tournament.find({ createdBy: userId })
+      .populate("franchises", "name")
+      .select(
+        "name rules registrationLimits playerLimitPerTeam knockoutStart semifinalStart finalStart"
+      );
 
     if (!tournaments || tournaments.length === 0) {
       throw new ApiError(404, "No tournaments registered yet");
     }
 
-    res.status(200).json(new ApiResponse("Tournaments retrieved successfully", tournaments));
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, "Tournaments retrieved successfully", tournaments)
+      );
   } catch (error) {
     next(error);
   }
-};
+});
