@@ -14,6 +14,7 @@ export const addNewTournament = asyncHandler(async (req, res) => {
     knockoutStart,
     semifinalStart,
     finalStart,
+    createdBy
   } = req.body;
 
   try {
@@ -25,7 +26,8 @@ export const addNewTournament = asyncHandler(async (req, res) => {
       !playerLimitPerTeam ||
       !knockoutStart ||
       !semifinalStart ||
-      !finalStart
+      !finalStart ||
+      !createdBy
     ) {
       throw new ApiError(400, "All fields are required");
     }
@@ -56,6 +58,7 @@ export const addNewTournament = asyncHandler(async (req, res) => {
       knockoutStart,
       semifinalStart,
       finalStart,
+      createdBy
     });
 
     // Create and save each franchise with reference to the tournament
