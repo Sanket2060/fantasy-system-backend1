@@ -70,6 +70,18 @@ const matchSchema = new Schema(
         ref: "Player",
       },
     ],
+    penaltySaves: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Player",
+      },
+    ],
+    ownGoals: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Player",
+      },
+    ],
   },
   { timestamps: true }
 );

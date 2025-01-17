@@ -47,11 +47,37 @@ const teamSchema = new Schema(
         required: true,
       },
     },
-    points: {
-      type: Map,
-      of: Number,
-      default: {},
-    },
+    points: [
+      {
+        matchNumber: {
+          type: Number,
+          required: true,
+        },
+        teamType: {
+          type: String,
+          enum: ["knockout", "semifinal", "final"],
+          required: true,
+        },
+        players: [
+          {
+            playerId: {
+              type: Schema.Types.ObjectId,
+              ref: "Player",
+              required: true,
+            },
+            points: {
+              type: Number,
+              required: true,
+            },
+          },
+        ],
+        matchNumberPoints: {
+          type: Number,
+          required: true,
+          default: 0,
+        },
+      },
+    ],
     totalPoints: {
       type: Number,
       default: 0,
