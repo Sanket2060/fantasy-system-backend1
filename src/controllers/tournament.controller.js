@@ -91,3 +91,25 @@ export const addNewTournament = asyncHandler(async (req, res) => {
       );
   }
 });
+
+
+// Controller to retrieve tournaments based on user's ID
+export const getTournamentsByUserId = async (req, res, next) => {
+  try {
+    const userId = req.user._id; // Assuming req.user is populated with the authenticated user's details
+
+    if (!userId) {
+      throw new ApiError(400, "User ID is required");
+    }
+
+    const tournaments = await Tournament.find({ createdBy: userId }).populate('name rules registrationLimits playerLimitPerTeam knockoutStart');
+
+    if (!tournaments || tournaments.length === 0) {
+      throw new ApiError(404, "No tournaments registered yet");
+    }
+
+    res.status(200).json(new ApiResponse("Tournaments retrieved successfully", tournaments));
+  } catch (error) {
+    next(error);
+  }
+};

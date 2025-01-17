@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const tournamentSchema = new Schema({
+  createdBy: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    required: true, // Ensure the createdBy field is always populated
+  },
   name: {
     type: String,
     required: true,
