@@ -1,0 +1,121 @@
+[
+    {
+      "name": "Player 1",
+      "price": 5,
+      "photo": "src/ksfdfjkld.jpg",
+      "tournamentId": "6788f238e1b8fe8bd4171325",
+      "matches": [],
+      "franchiseId": "6788f238e1b8fe8bd4171327",
+      "playerType": "defender"
+    },
+    {
+      "name": "Player 2",
+      "price": 7,
+      "photo": "src/ksfdfjkld.jpg",
+      "tournamentId": "6788f238e1b8fe8bd4171325",
+      "matches": [],
+      "franchiseId": "6788f238e1b8fe8bd4171327",
+      "playerType": "goalkeeper"
+    },
+    {
+      "name": "Player 3",
+      "price": 9,
+      "photo": "src/ksfdfjkld.jpg",
+      "tournamentId": "6788f238e1b8fe8bd4171325",
+      "matches": [],
+      "franchiseId": "6788f238e1b8fe8bd4171327",
+      "playerType": "midfielder"
+    },
+    {
+      "name": "Player 4",
+      "price": 4,
+      "photo": "src/ksfdfjkld.jpg",
+      "tournamentId": "6788f238e1b8fe8bd4171325",
+      "matches": [],
+      "franchiseId": "6788f238e1b8fe8bd4171327",
+      "playerType": "forward"
+    },
+    {
+      "name": "Player 5",
+      "price": 6,
+      "photo": "src/ksfdfjkld.jpg",
+      "tournamentId": "6788f238e1b8fe8bd4171325",
+      "matches": [],
+      "franchiseId": "6788f238e1b8fe8bd4171327",
+      "playerType": "goalkeeper"
+    },
+    {
+      "name": "Player 6",
+      "price": 8,
+      "photo": "src/ksfdfjkld.jpg",
+      "tournamentId": "6788f238e1b8fe8bd4171325",
+      "matches": [],
+      "franchiseId": "6788f238e1b8fe8bd4171327",
+      "playerType": "midfielder"
+    },
+    {
+      "name": "Player 7",
+      "price": 3,
+      "photo": "src/ksfdfjkld.jpg",
+      "tournamentId": "6788f238e1b8fe8bd4171325",
+      "matches": [],
+      "franchiseId": "6788f238e1b8fe8bd4171327",
+      "playerType": "forward"
+    },
+    {
+      "name": "Player 8",
+      "price": 5,
+      "photo": "src/ksfdfjkld.jpg",
+      "tournamentId": "6788f238e1b8fe8bd4171325",
+      "matches": [],
+      "franchiseId": "6788f238e1b8fe8bd4171327",
+      "playerType": "goalkeeper"
+    },
+    {
+      "name": "Player 9",
+      "price": 7,
+      "photo": "src/ksfdfjkld.jpg",
+      "tournamentId": "6788f238e1b8fe8bd4171325",
+      "matches": [],
+      "franchiseId": "6788f238e1b8fe8bd4171327",
+      "playerType": "forward"
+    },
+    {
+      "name": "Player 10",
+      "price": 9,
+      "photo": "src/ksfdfjkld.jpg",
+      "tournamentId": "6788f238e1b8fe8bd4171325",
+      "matches": [],
+      "franchiseId": "6788f238e1b8fe8bd4171327",
+      "playerType": "defender"
+    }
+  ],
+
+  //add players matchDetails:
+  {
+    "matchNumber": 1,
+    "matchName": "Pokhara vs KTM",
+    "playersPlayedTeam1": ["6788efe7f52f2b53dcbe2d69", "6788efe7f52f2b53dcbe2d6a", "6788efe7f52f2b53dcbe2d6b"],
+    "playersPlayedTeam2": ["6788efe7f52f2b53dcbe2d6c", "6788efe7f52f2b53dcbe2d6d", "6788efe7f52f2b53dcbe2d6e"],
+    "score": "2-1",
+    "goalsScoredBy": [
+      {
+        "player": "6788f238e1b8fe8bd4171325",
+        "goals": 1,
+        "assists": ["6788f238e1b8fe8bd4171327"]
+      },
+      {
+        "player": "6788f238e1b8fe8bd4171327",
+        "goals": 1,
+        "assists": ["6788f238e1b8fe8bd4171325"]
+      }
+    ],
+    "cardsObtained": {
+      "yellow": ["6788f238e1b8fe8bd4171325"],
+      "red": ["6788f238e1b8fe8bd4171325"]
+    },
+    "penaltiesMissed": ["6788f238e1b8fe8bd4171325"],
+    "tournament_id": "6788f238e1b8fe8bd4171325"
+  },
+
+  

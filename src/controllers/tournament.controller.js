@@ -5,10 +5,30 @@ import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 
 export const addNewTournament = asyncHandler(async (req, res) => {
-  const { name, rules, registrationLimits, franchises, playerLimitPerTeam } =
-    req.body;
+  const {
+    name,
+    rules,
+    registrationLimits,
+    franchises,
+    playerLimitPerTeam,
+    knockoutStart,
+    semifinalStart,
+    finalStart,
+  } = req.body;
 
   try {
+    if (
+      !name ||
+      !rules ||
+      !registrationLimits ||
+      !franchises ||
+      !playerLimitPerTeam ||
+      !knockoutStart ||
+      !semifinalStart ||
+      !finalStart
+    ) {
+      throw new ApiError(400, "All fields are required");
+    }
     // Check if franchise names are unique within the tournament
     const franchiseNames = franchises.map((f) => f.name.toLowerCase());
     const duplicateFranchise = franchiseNames.find(
@@ -33,6 +53,9 @@ export const addNewTournament = asyncHandler(async (req, res) => {
       rules,
       registrationLimits,
       playerLimitPerTeam,
+      knockoutStart,
+      semifinalStart,
+      finalStart,
     });
 
     // Create and save each franchise with reference to the tournament

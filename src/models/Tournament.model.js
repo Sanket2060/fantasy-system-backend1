@@ -15,6 +15,7 @@ const tournamentSchema = new Schema({
     required: true,
   },
   teamDetails: [
+    //fantasy team ho
     {
       type: Schema.Types.ObjectId,
       ref: "Team",
@@ -33,6 +34,10 @@ const tournamentSchema = new Schema({
   knockoutStart: { type: Date, required: true },
   semifinalStart: { type: Date, required: true },
   finalStart: { type: Date, required: true },
+  matches: {
+    type: Schema.Types.ObjectId,
+    ref: "MatchDetails",
+  },
 });
 
 const Tournament = mongoose.model("Tournament", tournamentSchema);

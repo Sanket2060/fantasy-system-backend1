@@ -9,7 +9,7 @@ const connectDB = async () => {
     console.log(
       `\n MongoDB connected ! DB host: ${connectionInstance.connection.host}`
     );
-    console.log("Connection instance:", connectionInstance); //hw-> connectionInstance is the result of the mongoose.connect() method, which returns a Mongoose connection instance
+    // console.log("Connection instance:", connectionInstance); //hw-> connectionInstance is the result of the mongoose.connect() method, which returns a Mongoose connection instance
     //contains properties and methods to interact with the database
   } catch (error) {
     console.log("MONGODB connection error: ", error);
