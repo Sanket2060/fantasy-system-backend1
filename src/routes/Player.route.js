@@ -4,6 +4,7 @@ import { verifyJWT, authorizeAdmin } from "../middlewares/auth.middleware.js";
 import Franchise from "../models/Franchise.model.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { ApiError } from "../utils/ApiError.js";
 
 const router = express.Router();
 
@@ -13,7 +14,15 @@ router.post(
   verifyJWT,
   authorizeAdmin,
   asyncHandler(async (req, res) => {
-    const { name, price, photo, tournamentId, matches, franchiseId,playerType } = req.body;
+    const {
+      name,
+      price,
+      photo,
+      tournamentId,
+      matches,
+      franchiseId,
+      playerType,
+    } = req.body;
 
     try {
       const franchise = await Franchise.findById(franchiseId);
@@ -42,7 +51,7 @@ router.post(
         tournamentId,
         franchise: franchiseId,
         matches,
-        playerType
+        playerType,
       });
       await player.save();
       res.status(201).send(player);
@@ -129,6 +138,63 @@ router.get(
         "Something went wrong while retrieving players",
         error.message
       );
+    }
+  })
+);
+
+// Route to retrieve players by franchise ID and tournament ID
+router.get(
+  "/:tournamentId/franchises/:franchiseId/players",
+  verifyJWT,
+  asyncHandler(async (req, res) => {
+    const { tournamentId, franchiseId } = req.params;
+
+    if (!tournamentId || !franchiseId) {
+      throw new ApiError(400, "Tournament ID and Franchise ID are required");
+    }
+
+    try {
+      const franchise = await Franchise.findById(franchiseId);
+
+      if (!franchise) {
+        return res
+          .status(404)
+          .json(new ApiResponse(404, {}, "Franchise not found"));
+      }
+
+      if (franchise.tournamentId.toString() !== tournamentId) {
+        return res
+          .status(400)
+          .json(
+            new ApiResponse(
+              400,
+              {},
+              "Franchise does not belong to the specified tournament"
+            )
+          );
+      }
+
+      const players = await Player.find({
+        tournamentId,
+        franchise: franchiseId,
+      });
+
+      if (players.length === 0) {
+        return res
+          .status(404)
+          .json(
+            new ApiResponse(
+              404,
+              {},
+              "No players found for the specified franchise and tournament"
+            )
+          );
+      }
+
+      res.status(200).json(new ApiResponse(200, players));
+    } catch (error) {
+      console.error("Error retrieving players", error);
+      throw new ApiError(500, "Something went wrong while retrieving players");
     }
   })
 );

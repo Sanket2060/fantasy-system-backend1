@@ -4,6 +4,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import mongoose from "mongoose";
+import MatchDetails from "../models/MatchDetails.model.js";
 
 export const addNewTournament = asyncHandler(async (req, res) => {
   const {
@@ -138,5 +139,84 @@ export const getTournamentsByUserId = asyncHandler(async (req, res) => {
       );
   } catch (error) {
     next(error);
+  }
+});
+
+// Controller to retrieve franchises based on tournament ID
+export const getFranchisesByTournamentId = asyncHandler(async (req, res) => {
+  const { tournamentId } = req.params;
+  console.log("tournamentId", tournamentId);
+
+  if (!tournamentId) {
+    throw new ApiError(400, "Tournament ID is required");
+  }
+  // Validate tournamentId
+  if (!mongoose.Types.ObjectId.isValid(tournamentId)) {
+    return res.status(400).json(new ApiResponse(400, "Invalid tournament ID"));
+  }
+
+  try {
+    const tournament =
+      await Tournament.findById(tournamentId).populate("franchises");
+
+    if (!tournament) {
+      throw new ApiError(404, "Tournament not found");
+    }
+
+    const franchises = tournament.franchises;
+
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, "Franchises retrieved successfully", franchises)
+      );
+  } catch (error) {
+    console.error("Error retrieving franchises", error);
+    throw new ApiError(500, "Something went wrong while retrieving franchises");
+  }
+});
+
+export const getMatchDetailsByTournamentId = asyncHandler(async (req, res) => {
+  const { tournamentId } = req.params;
+
+  if (!tournamentId) {
+    throw new ApiError(400, "Tournament ID is required");
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(tournamentId)) {
+    throw new ApiError(400, "Invalid Tournament ID");
+  }
+
+  try {
+    const tournament =
+      await Tournament.findById(tournamentId).populate("matches");
+
+    if (!tournament) {
+      throw new ApiError(404, "Tournament not found");
+    }
+
+    const matches = await MatchDetails.find({ tournament: tournamentId });
+
+    if (matches.length === 0) {
+      return res
+        .status(404)
+        .json(
+          new ApiResponse(
+            404,
+            {},
+            "No matche details found for the specified tournament"
+          )
+        );
+    }
+
+    res
+      .status(200)
+      .json(new ApiResponse(200, "Matches retrieved successfully", matches));
+  } catch (error) {
+    console.error("Error retrieving match details", error);
+    throw new ApiError(
+      500,
+      "Something went wrong while retrieving match details"
+    );
   }
 });

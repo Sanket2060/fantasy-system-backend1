@@ -3,6 +3,8 @@ import Tournament from "../models/Tournament.model.js";
 import { verifyJWT, authorizeAdmin } from "../middlewares/auth.middleware.js";
 import {
   addNewTournament,
+  getFranchisesByTournamentId,
+  getMatchDetailsByTournamentId,
   getTournamentsByUserId,
 } from "../controllers/tournament.controller.js";
 
@@ -16,4 +18,8 @@ router.get(
   authorizeAdmin,
   getTournamentsByUserId
 );
+router.get("/franchises/:tournamentId", verifyJWT, getFranchisesByTournamentId);
+
+// Route to get match details by tournament ID
+router.get("/:tournamentId/matches", verifyJWT, getMatchDetailsByTournamentId);
 export default router;
