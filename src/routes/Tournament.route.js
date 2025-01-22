@@ -12,12 +12,7 @@ const router = express.Router();
 
 // Admin route to add a new tournament
 router.post("/new", verifyJWT, authorizeAdmin, addNewTournament);
-router.get(
-  "/getTournamentsByUserId",
-  verifyJWT,
-  authorizeAdmin,
-  getTournamentsByUserId
-);
+router.get("/getTournamentsByUserId", verifyJWT, getTournamentsByUserId);
 router.get("/franchises/:tournamentId", verifyJWT, getFranchisesByTournamentId);
 
 // Route to get match details by tournament ID
