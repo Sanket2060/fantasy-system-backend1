@@ -7,7 +7,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import Tournament from "../models/Tournament.model.js";
-import checkUpdateWindowAndConsumeTicket from '../middlewares/checkUpdateWindowAndConsumeTicket.js'
+import checkUpdateWindowAndConsumeTicket from "../middlewares/checkUpdateWindowAndConsumeTicket.js";
 
 const router = express.Router();
 // Route to create a new team
@@ -22,7 +22,7 @@ router.post(
       // Check if the players array has exactly the required number of unique values
       const tournament = await Tournament.findById(tournamentId);
       if (!tournament) {
-        throw new ApiError(404, "Tournament not found");
+        throw new ApiError(204, "Tournament not found");
       }
 
       const requiredPlayersCount = tournament.playerLimitPerTeam;
@@ -96,7 +96,7 @@ router.put(
       const team = await Team.findOne({ _id: teamId, userId });
       if (!team) {
         throw new ApiError(
-          404,
+          204,
           "Team not found or you do not have permission to edit this team"
         );
       }
@@ -104,7 +104,7 @@ router.put(
       // Find the related tournament to get the player limit per team
       const tournament = await Tournament.findById(team.tournamentId);
       if (!tournament) {
-        throw new ApiError(404, "Tournament not found");
+        throw new ApiError(204, "Tournament not found");
       }
 
       const requiredPlayersCount = tournament.playerLimitPerTeam;
@@ -141,8 +141,13 @@ router.put(
       }
 
       // Validate the total budget
-      const validPlayers = await Player.find({ _id: { $in: Array.from(updatedPlayers) } });
-      const totalBudget = validPlayers.reduce((acc, player) => acc + player.price, 0);
+      const validPlayers = await Player.find({
+        _id: { $in: Array.from(updatedPlayers) },
+      });
+      const totalBudget = validPlayers.reduce(
+        (acc, player) => acc + player.price,
+        0
+      );
       if (totalBudget > 100) {
         throw new ApiError(400, "Total budget of players exceeds 100");
       }
