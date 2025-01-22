@@ -199,4 +199,36 @@ router.get(
   })
 );
 
+//route to get all players of the tournament by tournamentId
+// Route to get all players of the tournament by tournamentId
+router.get(
+  "/:tournamentId/players",
+  verifyJWT,
+  asyncHandler(async (req, res) => {
+    const { tournamentId } = req.params;
+
+    // Validate tournamentId
+    if (!mongoose.Types.ObjectId.isValid(tournamentId)) {
+      return res
+        .status(400)
+        .json(new ApiResponse(400, "Invalid tournament ID"));
+    }
+
+    try {
+      // Fetch players associated with the tournament
+      const players = await Player.find({ tournamentId }).populate("franchise");
+
+      if (players.length === 0) {
+        return res.status(204).send(); // No Content
+      }
+
+      res
+        .status(200)
+        .json(new ApiResponse(200, "Players retrieved successfully", players));
+    } catch (error) {
+      console.error("Error retrieving players", error);
+      throw new ApiError(500, "Something went wrong while retrieving players");
+    }
+  })
+);
 export default router;
