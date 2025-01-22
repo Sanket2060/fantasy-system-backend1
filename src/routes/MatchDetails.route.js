@@ -58,6 +58,11 @@ router.post(
         throw new ApiError(400, "Invalid tournament ID");
       }
 
+      // Initialize the `matches` array if it doesn't exist
+      if (!tournament.matches) {
+        tournament.matches = [];
+      }
+
       // Validate player IDs
       const validatePlayerIds = async (playerIds) => {
         for (const playerId of playerIds) {
@@ -104,7 +109,7 @@ router.post(
       if (matchExists) {
         throw new ApiError(
           400,
-          "Match number already exists in this tournament"
+          `Match number ${matchNumber} already exists in this tournament`
         );
       }
 
@@ -131,6 +136,7 @@ router.post(
       if (!match) {
         throw new ApiError(500, "Failed to add match details");
       }
+      console.log("match", match);
 
       // Add the match to the tournament's matches array and save the tournament
       tournament.matches.push(match[0]._id);
@@ -224,6 +230,7 @@ router.post(
         .json(new ApiResponse("Match details added successfully", match[0]));
     } catch (error) {
       await session.abortTransaction();
+      console.error(error);
       session.endSession();
       throw error;
     }

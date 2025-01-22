@@ -22,7 +22,7 @@ router.post(
       // Check if the players array has exactly the required number of unique values
       const tournament = await Tournament.findById(tournamentId);
       if (!tournament) {
-        throw new ApiError(204, "Tournament not found");
+        throw new ApiError(404, "Tournament not found");
       }
 
       const requiredPlayersCount = tournament.playerLimitPerTeam;
@@ -96,7 +96,7 @@ router.put(
       const team = await Team.findOne({ _id: teamId, userId });
       if (!team) {
         throw new ApiError(
-          204,
+          404,
           "Team not found or you do not have permission to edit this team"
         );
       }
@@ -104,7 +104,7 @@ router.put(
       // Find the related tournament to get the player limit per team
       const tournament = await Tournament.findById(team.tournamentId);
       if (!tournament) {
-        throw new ApiError(204, "Tournament not found");
+        throw new ApiError(404, "Tournament not found");
       }
 
       const requiredPlayersCount = tournament.playerLimitPerTeam;

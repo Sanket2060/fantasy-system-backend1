@@ -28,8 +28,8 @@ router.post(
       const franchise = await Franchise.findById(franchiseId);
       if (!franchise) {
         return res
-          .status(204)
-          .json(new ApiResponse(204, {}, "Franchise not found"));
+          .status(404)
+          .json(new ApiResponse(404, {}, "Franchise not found"));
       }
 
       if (franchise.tournamentId.toString() !== tournamentId) {
@@ -83,7 +83,7 @@ router.patch(
       const player = await Player.findById(id);
       if (!player) {
         return res
-          .status(204)
+          .status(404)
           .json(new ApiResponse(400, {}, "Player not found"));
       }
 
@@ -158,8 +158,8 @@ router.get(
 
       if (!franchise) {
         return res
-          .status(204)
-          .json(new ApiResponse(204, {}, "Franchise not found"));
+          .status(404)
+          .json(new ApiResponse(404, {}, "Franchise not found"));
       }
 
       if (franchise.tournamentId.toString() !== tournamentId) {
@@ -181,10 +181,10 @@ router.get(
 
       if (players.length === 0) {
         return res
-          .status(204)
+          .status(404)
           .json(
             new ApiResponse(
-              204,
+              404,
               {},
               "No players found for the specified franchise and tournament"
             )
@@ -219,7 +219,7 @@ router.get(
       const players = await Player.find({ tournamentId }).populate("franchise");
 
       if (players.length === 0) {
-        return res.status(204).send(); // No Content
+        return res.status(404).send(); // No Content
       }
 
       res

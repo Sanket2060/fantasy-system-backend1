@@ -129,7 +129,7 @@ export const getTournamentsByUserId = asyncHandler(async (req, res) => {
       );
 
     if (!tournaments || tournaments.length === 0) {
-      throw new ApiError(204, "No tournaments registered yet");
+      throw new ApiError(404, "No tournaments registered yet");
     }
 
     res
@@ -160,7 +160,7 @@ export const getFranchisesByTournamentId = asyncHandler(async (req, res) => {
       await Tournament.findById(tournamentId).populate("franchises");
 
     if (!tournament) {
-      throw new ApiError(204, "Tournament not found");
+      throw new ApiError(404, "Tournament not found");
     }
 
     const franchises = tournament.franchises;
@@ -192,17 +192,17 @@ export const getMatchDetailsByTournamentId = asyncHandler(async (req, res) => {
       await Tournament.findById(tournamentId).populate("matches");
 
     if (!tournament) {
-      throw new ApiError(204, "Tournament not found");
+      throw new ApiError(404, "Tournament not found");
     }
 
     const matches = await MatchDetails.find({ tournament: tournamentId });
 
     if (matches.length === 0) {
       return res
-        .status(204)
+        .status(404)
         .json(
           new ApiResponse(
-            204,
+            404,
             {},
             "No match details found for the specified tournament"
           )

@@ -7,7 +7,6 @@ const matchSchema = new Schema(
     matchNumber: {
       type: Number,
       required: true,
-      unique: true,
     },
     matchName: {
       type: String,

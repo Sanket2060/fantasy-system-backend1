@@ -10,12 +10,12 @@ const checkUpdateWindowAndConsumeTicket = async (req, res, next) => {
   try {
     const tournament = await Tournament.findById(tournamentId);
     if (!tournament) {
-      return res.status(204).json({ message: "Tournament not found" });
+      return res.status(404).json({ message: "Tournament not found" });
     }
 
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(204).json({ message: "User not found" });
+      return res.status(404).json({ message: "User not found" });
     }
 
     let phase = null;
