@@ -237,7 +237,9 @@ router.post(
 
       res
         .status(201)
-        .json(new ApiResponse("Match details added successfully", match[0]));
+        .json(
+          new ApiResponse(201, match[0], "Match details added successfully")
+        );
     } catch (error) {
       await session.abortTransaction();
       console.error(error);
