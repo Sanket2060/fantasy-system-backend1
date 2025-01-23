@@ -52,8 +52,9 @@ router.post(
 
     try {
       // Validate tournament ID
-      const tournament =
-        await Tournament.findById(tournament_id).session(session);
+      const tournament = await Tournament.findById(tournament_id)
+        .populate("matches")
+        .session(session);
       if (!tournament) {
         throw new ApiError(400, "Invalid tournament ID");
       }
@@ -102,10 +103,19 @@ router.post(
       }
 
       // Check if a match with the same matchNumber already exists in the tournament
-      const matchExists = await MatchDetails.findOne({
-        matchNumber,
-        tournament: tournament_id,
-      }).session(session);
+
+      // Check if any match in the populated matches array has the same matchNumber
+      const matchExists = tournament.matches.some(
+        (match) => match.matchNumber === matchNumber
+      );
+
+      if (matchExists) {
+        throw new ApiError(
+          400,
+          `Match number ${matchNumber} already exists in this tournament`
+        );
+      }
+
       if (matchExists) {
         throw new ApiError(
           400,
