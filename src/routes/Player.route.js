@@ -25,6 +25,19 @@ router.post(
     } = req.body;
 
     try {
+      // Check if a player with the same name already exists in the tournament
+      const existingPlayer = await Player.findOne({ name, tournamentId });
+      if (existingPlayer) {
+        return res
+          .status(400)
+          .json(
+            new ApiResponse(
+              400,
+              {},
+              "A player with the same name already exists in the tournament"
+            )
+          );
+      }
       const franchise = await Franchise.findById(franchiseId);
       if (!franchise) {
         return res
@@ -54,7 +67,9 @@ router.post(
         playerType,
       });
       await player.save();
-      res.status(201).send(player);
+      res
+        .status(201)
+        .json(new ApiResponse(201, player, "Player added successfully"));
     } catch (error) {
       console.log("Error while adding new player", error.message);
       return res
