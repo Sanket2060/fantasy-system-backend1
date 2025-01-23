@@ -135,7 +135,7 @@ export const getTournamentsByUserId = asyncHandler(async (req, res) => {
     res
       .status(200)
       .json(
-        new ApiResponse(200, "Tournaments retrieved successfully", tournaments)
+        new ApiResponse(200, tournaments, "Tournaments retrieved successfully")
       );
   } catch (error) {
     next(error);
@@ -151,8 +151,10 @@ export const getFranchisesByTournamentId = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Tournament ID is required");
   }
   // Validate tournamentId
-  if (!mongoose.Types.ObjectId.isValid(tournamentId)) {
-    return res.status(400).json(new ApiResponse(400, "Invalid tournament ID"));
+  const tournament = await Tournament.findById(tournamentId);
+
+  if (!tournament) {
+    return res.status(404).json(new ApiResponse(404, "Not a valid tournament"));
   }
 
   try {
@@ -160,7 +162,7 @@ export const getFranchisesByTournamentId = asyncHandler(async (req, res) => {
       await Tournament.findById(tournamentId).populate("franchises");
 
     if (!tournament) {
-      throw new ApiError(404, "Tournament not found");
+      res.status(404).json(new ApiResponse(404, {}, "Tournament not found"));
     }
 
     const franchises = tournament.franchises;
@@ -168,7 +170,7 @@ export const getFranchisesByTournamentId = asyncHandler(async (req, res) => {
     res
       .status(200)
       .json(
-        new ApiResponse(200, "Franchises retrieved successfully", franchises)
+        new ApiResponse(200, franchises, "Franchises retrieved successfully")
       );
   } catch (error) {
     console.error("Error retrieving franchises", error);
@@ -211,7 +213,7 @@ export const getMatchDetailsByTournamentId = asyncHandler(async (req, res) => {
 
     res
       .status(200)
-      .json(new ApiResponse(200, "Matches retrieved successfully", matches));
+      .json(new ApiResponse(200, matches, "Matches retrieved successfully"));
   } catch (error) {
     console.error("Error retrieving match details", error);
     throw new ApiError(
