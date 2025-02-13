@@ -15,10 +15,31 @@ router.post(
   "/create",
   verifyJWT,
   asyncHandler(async (req, res) => {
-    const { name, players, budget, tournamentId } = req.body;
+    const { name, players, tournamentId } = req.body;
     const userId = req.user._id; // Assuming user ID is available in req.user
+    if (req.user.role === "admin") {
+      console.error("Admin cannot create a team");
+      throw new ApiError(403, "Admin cannot create a team");
+    }
 
     try {
+      //check if the team name is already taken
+      const teamNameExists = await Team.findOne({ name, tournamentId });
+      if (teamNameExists) {
+        throw new ApiError(
+          400,
+          "This Team name already exists in this tournament"
+        );
+      }
+      if (!name || !players || !tournamentId) {
+        throw new ApiError(400, "All required fields must be provided");
+      }
+      //check if the player already has a team in this tournament
+      const teamExists = await Team.findOne({ userId, tournamentId });
+      if (teamExists) {
+        throw new ApiError(400, "You already have a team in this tournament");
+      }
+
       // Check if the players array has exactly the required number of unique values
       const tournament = await Tournament.findById(tournamentId);
       if (!tournament) {
@@ -56,8 +77,8 @@ router.post(
       const team = await Team.create({
         name,
         userId,
-        players,
-        budget,
+        players: { knockout: players }, //first time team creation so set to the lowest stage the 'knockout'
+        budget: { knockout: totalBudget }, //first time team creation so set to the lowest stage the 'knockout'
       });
 
       // Find the relevant tournament and update its teams array
@@ -74,7 +95,7 @@ router.post(
       }
       throw new ApiError(
         500,
-        `Something went wrong while creating the team: ${error.message}`,
+        `Something went wrong while creating the team.`,
         error.message
       );
     }

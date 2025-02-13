@@ -31,6 +31,7 @@ router.post(
       tournament_id,
       penaltySaves,
       ownGoals,
+      // matchType,
     } = req.body;
 
     // Validate required fields
@@ -43,6 +44,7 @@ router.post(
       !tournament_id ||
       !penaltySaves ||
       !ownGoals
+      // !matchType
     ) {
       throw new ApiError(400, "All required fields must be provided");
     }
@@ -138,6 +140,7 @@ router.post(
             tournament: tournament_id,
             ownGoals,
             penaltySaves,
+            matchType,
           },
         ],
         { session }

@@ -12,6 +12,7 @@ const matchSchema = new Schema(
       type: String,
       required: true,
     },
+    // matchType: ["knockout", "semifinal", "final"],
     playersPlayedTeam1: [
       {
         type: Schema.Types.ObjectId,

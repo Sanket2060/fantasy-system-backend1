@@ -13,6 +13,11 @@ const teamSchema = new Schema(
       ref: "User",
       required: true,
     },
+    tournamentId:{
+      type:Schema.Types.ObjectId,
+      ref:"Tournament",
+      required:true
+    },
     players: {
       knockout: [
         {
@@ -36,15 +41,12 @@ const teamSchema = new Schema(
     budget: {
       knockout: {
         type: Number,
-        required: true,
       },
       semifinal: {
         type: Number,
-        required: true,
       },
       final: {
         type: Number,
-        required: true,
       },
     },
     points: [
