@@ -75,6 +75,8 @@ router.post(
           }
         }
       };
+      // console.log("playersPlayedTeam1", playersPlayedTeam1);
+      // console.log("playersPlayedTeam2", playersPlayedTeam2);
 
       await validatePlayerIds(playersPlayedTeam1);
       await validatePlayerIds(playersPlayedTeam2);
@@ -105,18 +107,10 @@ router.post(
       }
 
       // Check if a match with the same matchNumber already exists in the tournament
-
       // Check if any match in the populated matches array has the same matchNumber
       const matchExists = tournament.matches.some(
         (match) => match.matchNumber === matchNumber
       );
-
-      if (matchExists) {
-        throw new ApiError(
-          400,
-          `Match number ${matchNumber} already exists in this tournament`
-        );
-      }
 
       if (matchExists) {
         throw new ApiError(
@@ -140,7 +134,7 @@ router.post(
             tournament: tournament_id,
             ownGoals,
             penaltySaves,
-            matchType,
+            // matchType,
           },
         ],
         { session }
@@ -149,28 +143,34 @@ router.post(
       if (!match) {
         throw new ApiError(500, "Failed to add match details");
       }
-      console.log("match", match);
+      // console.log("match", match);
 
       // Add the match to the tournament's matches array and save the tournament
       tournament.matches.push(match[0]._id);
       await tournament.save({ session });
 
       // Fetch all players involved in the match
+      // ⚠️(but this array contains repeatition as playersPlayedTeam1 and goalsScoredBy might contains sam players)
+      // Fetch all players involved in the match
       const allPlayerIds = [
         ...playersPlayedTeam1,
         ...playersPlayedTeam2,
-        ...goalsScoredBy.map((goal) => goal.player),
-        ...goalsScoredBy.flatMap((goal) => goal.assists),
-        ...cardsObtained.yellow,
-        ...cardsObtained.red,
-        ...penaltiesMissed,
+        // Uncomment and include other player arrays as needed
+        // ...goalsScoredBy.map((goal) => goal.player),
+        // ...goalsScoredBy.flatMap((goal) => goal.assists),
+        // ...cardsObtained.yellow,
+        // ...cardsObtained.red,
+        // ...penaltiesMissed,
       ];
-      const players = await Player.find({ _id: { $in: allPlayerIds } }).session(
-        session
-      );
+      const players = await Player.find({
+        tournamentId: tournament_id,
+        _id: { $in: allPlayerIds },
+      }).session(session);
+      // console.log("players",players);
 
       // Calculate points for players
       const playerPoints = calculatePoints(match[0], players);
+      console.log("player Points from match Details route", playerPoints);
 
       // Update player matches array
       for (const { playerId, matchNumber, points } of playerPoints) {
@@ -181,8 +181,9 @@ router.post(
         }
       }
 
-      // Update team points
+      // Update team points for all the user team's
       const teams = await Team.find({
+        tournament: tournament_id,
         $or: [
           { "players.final": { $exists: true, $ne: [] } },
           { "players.semifinal": { $exists: true, $ne: [] } },
@@ -191,6 +192,7 @@ router.post(
       }).session(session);
 
       for (const team of teams) {
+        //for each franchise team create teamPlayers and teamType
         let teamPlayers = [];
         let teamType = "";
 
@@ -205,8 +207,10 @@ router.post(
           teamType = "knockout";
         }
 
+        console.log("playerPoints", playerPoints);
         const matchPoints = teamPlayers.map((playerId) => {
           const playerPoint = playerPoints.find(
+            //find method is method of javascript that returns first matching value in an array
             (pp) => pp.playerId === playerId
           );
           return {
@@ -214,13 +218,15 @@ router.post(
             points: playerPoint ? playerPoint.points : 0,
           };
         });
+        console.log("matchPoints for the team", matchPoints);
 
-        const matchNumberPoints = matchPoints.reduce(
+        const matchNumberPoints = await matchPoints.reduce(
+          //calculate current match points of the team
           (acc, curr) => acc + curr.points,
           0
         );
 
-        team.points.push({
+        await team.points.push({
           matchNumber,
           teamType,
           players: matchPoints,
@@ -228,7 +234,7 @@ router.post(
         });
 
         // Calculate totalPoints
-        team.totalPoints = team.points.reduce(
+        team.totalPoints = await team.points.reduce(
           (acc, curr) => acc + curr.matchNumberPoints,
           0
         );
@@ -247,7 +253,10 @@ router.post(
       await session.abortTransaction();
       console.error(error);
       session.endSession();
-      throw error;
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw new ApiError(500, "Failed to add match Details");
     }
   })
 );

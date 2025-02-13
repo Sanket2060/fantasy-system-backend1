@@ -26,7 +26,8 @@ const generateAccessAndRefreshTokens = async (userId) => {
   }
 };
 
-const completeRegistration = asyncHandler(async (req, res) => {  //asyncHandler->provide extra try-catch to prevent app crashing
+const completeRegistration = asyncHandler(async (req, res) => {
+  //asyncHandler->provide extra try-catch to prevent app crashing
   try {
     console.log("On complete registration");
     const { email, username, password, role } = req.body;
@@ -92,7 +93,7 @@ const LoginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   console.log("email from login User:", email);
   if (!email) {
-    throw new ApiError(400,"Email is required");
+    throw new ApiError(400, "Email is required");
   }
 
   try {
@@ -155,6 +156,9 @@ const LoginUser = asyncHandler(async (req, res) => {
       );
   } catch (error) {
     console.log(`Error somewhere at complete registration: ${error}`);
+    if (error instanceof ApiError) {
+      throw new ApiError(error.statusCode, error.message);
+    }
     throw new ApiError(500, `Error logging user in`);
   }
 });
