@@ -180,19 +180,22 @@ router.post(
           await player.save({ session });
         }
       }
+      console.log("tournamentId", tournament_id);
 
       // Update team points for all the user team's
       const teams = await Team.find({
-        tournament: tournament_id,
+        tournamentId: tournament_id,
         $or: [
           { "players.final": { $exists: true, $ne: [] } },
           { "players.semifinal": { $exists: true, $ne: [] } },
           { "players.knockout": { $exists: true, $ne: [] } },
         ],
       }).session(session);
+      console.log("teams", teams);
 
       for (const team of teams) {
         //for each franchise team create teamPlayers and teamType
+        console.log("team", team);
         let teamPlayers = [];
         let teamType = "";
 
@@ -211,7 +214,7 @@ router.post(
         const matchPoints = teamPlayers.map((playerId) => {
           const playerPoint = playerPoints.find(
             //find method is method of javascript that returns first matching value in an array
-            (pp) => pp.playerId === playerId
+            (pp) => pp.playerId.toString() === playerId.toString()
           );
           return {
             playerId,

@@ -26,6 +26,8 @@ import tournamentRoutes from "./routes/Tournament.route.js";
 app.use("/api/tournaments", tournamentRoutes);
 import teamRoutes from "./routes/Team.route.js";
 app.use("/api/teams", teamRoutes);
-import matchDetails from './routes/MatchDetails.route.js'
-app.use("/api/matchDetails",matchDetails);
+import matchDetails from "./routes/MatchDetails.route.js";
+app.use("/api/matchDetails", matchDetails);
+import Leaderboard from "./routes/Leaderboard.route.js";
+app.use("/api/Leaderboard", Leaderboard);
 export { app };

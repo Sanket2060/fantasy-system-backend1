@@ -79,6 +79,7 @@ router.post(
         userId,
         players: { knockout: players }, //first time team creation so set to the lowest stage the 'knockout'
         budget: { knockout: totalBudget }, //first time team creation so set to the lowest stage the 'knockout'
+        tournamentId
       });
 
       // Find the relevant tournament and update its teams array
