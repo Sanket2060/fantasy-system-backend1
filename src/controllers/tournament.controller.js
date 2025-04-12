@@ -218,30 +218,18 @@ export const getMatchDetailsByTournamentId = asyncHandler(async (req, res) => {
   }
 
   try {
-    const tournament =
-      await Tournament.findById(tournamentId).populate("matches");
+    const tournament = await Tournament.findById(tournamentId)
+      .select("_id matches")
+      .populate("matches");
 
+    console.log("tournament", tournament);
     if (!tournament) {
       throw new ApiError(404, "Tournament not found");
     }
 
-    const matches = await MatchDetails.find({ tournament: tournamentId });
-
-    if (matches.length === 0) {
-      return res
-        .status(404)
-        .json(
-          new ApiResponse(
-            404,
-            {},
-            "No match details found for the specified tournament"
-          )
-        );
-    }
-
     res
       .status(200)
-      .json(new ApiResponse(200, matches, "Matches retrieved successfully"));
+      .json(new ApiResponse(200, tournament, "Matches retrieved successfully"));
   } catch (error) {
     console.error("Error retrieving match details", error);
     throw new ApiError(
