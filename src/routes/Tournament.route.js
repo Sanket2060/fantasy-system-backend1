@@ -6,7 +6,7 @@ import {
   getAllTournaments,
   getFranchisesByTournamentId,
   getMatchDetailsByTournamentId,
-  getTournamentsByUserId,
+  getTournamentByUserId,
   getTournamentsByUserIdAdmin,
 } from "../controllers/tournament.controller.js";
 
@@ -14,7 +14,7 @@ const router = express.Router();
 
 // Admin route to add a new tournament
 router.post("/new", verifyJWT, authorizeAdmin, addNewTournament);
-router.get("/getTournamentsByUserId", verifyJWT, getTournamentsByUserId);
+router.get("/getTournamentsByUserId", verifyJWT, getTournamentByUserId);
 router.get("/getAllTournaments", verifyJWT, getAllTournaments);
 router.get("/franchises/:tournamentId", verifyJWT, getFranchisesByTournamentId);
 
