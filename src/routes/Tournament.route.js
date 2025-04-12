@@ -7,6 +7,7 @@ import {
   getFranchisesByTournamentId,
   getMatchDetailsByTournamentId,
   getTournamentsByUserId,
+  getTournamentsByUserIdAdmin,
 } from "../controllers/tournament.controller.js";
 
 const router = express.Router();
