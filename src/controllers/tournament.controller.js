@@ -115,7 +115,7 @@ export const addNewTournament = asyncHandler(async (req, res) => {
 });
 
 // Controller to retrieve tournaments based on user's ID
-export const getTournamentsByUserId = asyncHandler(async (req, res, next) => {
+export const getTournamentsByUserIdAdmin = asyncHandler(async (req, res) => {
   try {
     const userId = req.user._id; // Assuming req.user is populated with the authenticated user's details
 
@@ -142,43 +142,35 @@ export const getTournamentsByUserId = asyncHandler(async (req, res, next) => {
     next(error);
   }
 });
-// Controller to get user's teams by user ID
-export const getTeamsByUserId = asyncHandler(async (req, res) => {
+
+export const getTournamentByUserId=asyncHandler(async (req,res)=>{
   try {
-    const userId = req.user._id;
+    const userId = req.user._id; // Assuming req.user is populated with the authenticated user's details
 
     if (!userId) {
       throw new ApiError(400, "User ID is required");
     }
 
-    console.log("Fetching teams for user:", userId); // Debug log
-
-    const teams = await Team.find({ userId })
-      .populate({
-        path: "tournamentId",
-        select: "name knockoutStart semifinalStart finalStart",
-      })
-      .populate({
-        path: "players.knockout",
-        select: "name role price playerType photo",
-      });
-
-    console.log("Teams found:", teams); // Debug log
-
-    if (!teams || teams.length === 0) {
-      return res.status(200).json(
-        new ApiResponse(200, [], "No teams found for this user")
+    const tournaments = await Tournament.find({ createdBy: userId })
+      .populate("franchises", "name")
+      .select(
+        "name rules registrationLimits playerLimitPerTeam knockoutStart semifinalStart finalStart"
       );
+
+    if (!tournaments || tournaments.length === 0) {
+      throw new ApiError(404, "No tournaments registered yet");
     }
 
-    res.status(200).json(
-      new ApiResponse(200, teams, "Teams retrieved successfully")
-    );
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, tournaments, "Tournaments retrieved successfully")
+      );
   } catch (error) {
-    console.error("Error in getTeamsByUserId:", error); // Detailed error log
-    throw new ApiError(500, error.message || "Failed to fetch teams");
+    next(error);
   }
-});
+})
+
 // Controller to retrieve franchises based on tournament ID
 export const getFranchisesByTournamentId = asyncHandler(async (req, res) => {
   const { tournamentId } = req.params;
