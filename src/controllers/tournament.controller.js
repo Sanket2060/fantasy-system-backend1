@@ -1,4 +1,5 @@
 import Tournament from "../models/Tournament.model.js";
+import Team from "../models/Team.model.js"
 import Franchise from "../models/Franchise.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
@@ -123,7 +124,7 @@ export const getTournamentsByUserIdAdmin = asyncHandler(async (req, res) => {
       throw new ApiError(400, "User ID is required");
     }
 
-    const tournaments = await Tournament.find({ createdBy: userId })
+    const tournaments = await Tournament.find()
       .populate("franchises", "name")
       .select(
         "name rules registrationLimits playerLimitPerTeam knockoutStart semifinalStart finalStart"
