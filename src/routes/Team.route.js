@@ -7,7 +7,9 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import Tournament from "../models/Tournament.model.js";
-import checkUpdateWindowAndConsumeTicket from "../middlewares/checkUpdateWindowAndConsumeTicket.js";
+import checkUpdateWindowAndTicket from "../middlewares/checkUpdateWindowAndTicket.js";
+import mongoose from "mongoose";
+import { User } from "../models/User.model.js";
 
 const router = express.Router();
 // Route to create a new team
@@ -79,8 +81,14 @@ router.post(
         userId,
         players: { knockout: players }, //first time team creation so set to the lowest stage the 'knockout'
         budget: { knockout: totalBudget }, //first time team creation so set to the lowest stage the 'knockout'
-        tournamentId
+        tournamentId,
       });
+
+      const user = await User.findById({ userId });
+      if (user) {
+        user.tickets.knockout = false; //false the updation quota for the knockout(as single updation allowed in single times)
+        user.save();
+      }
 
       // Find the relevant tournament and update its teams array
       tournament.teamDetails.push(team._id);
@@ -107,13 +115,18 @@ router.post(
 router.put(
   "/:teamId",
   verifyJWT,
-  checkUpdateWindowAndConsumeTicket,
+  checkUpdateWindowAndTicket,
   asyncHandler(async (req, res) => {
     const { teamId } = req.params;
     const { addPlayers, removePlayers } = req.body;
     const userId = req.user._id; // Assuming user ID is available in req.user
-
+    const phase = req.user.phase; //phase got from checkUpdateWindow middleware
     try {
+      console.log("teamId", teamId);
+      if (!teamId) {
+        throw new ApiError(400, "Please provide the teamId");
+      }
+      console.log("userId", userId);
       // Find the team and ensure it belongs to the authenticated user
       const team = await Team.findOne({ _id: teamId, userId });
       if (!team) {
@@ -122,6 +135,7 @@ router.put(
           "Team not found or you do not have permission to edit this team"
         );
       }
+      console.log("tournamentId", team.tournamentId);
 
       // Find the related tournament to get the player limit per team
       const tournament = await Tournament.findById(team.tournamentId);
@@ -129,11 +143,11 @@ router.put(
         throw new ApiError(404, "Tournament not found");
       }
 
-      const requiredPlayersCount = tournament.playerLimitPerTeam;
+      const requiredPlayersCount = tournament.playerLimitPerTeam; //to count total players at end
 
       // Initialize updatedPlayers set with existing team players
       let updatedPlayers = new Set(
-        team.players.map((player) => player.toString())
+        team.players[phase].map((player) => player.toString()) //which players knockout,semifinal or final  defined using phase
       );
 
       // Remove players if specified
@@ -153,12 +167,12 @@ router.put(
         }
         addPlayers.forEach((playerId) => updatedPlayers.add(playerId));
       }
-
+      console.log("Final updated list:", updatedPlayers);
       // Validate the number of players
       if (updatedPlayers.size !== requiredPlayersCount) {
         throw new ApiError(
           400,
-          `Players array must contain ${requiredPlayersCount} unique player IDs`
+          `After addition and deletion, total players count doesn't reaches ${requiredPlayersCount}`
         );
       }
 
@@ -175,12 +189,18 @@ router.put(
       }
 
       // Update the team players
-      team.players = Array.from(updatedPlayers);
+      team.players[phase] = Array.from(updatedPlayers); //⚠️team.players.teamType(knockout,semifinal,final) defined
       await team.save();
+
+      const user = await User.findById(userId);
+      if (user) {
+        user.tickets[phase] = false; //false the updation quota for the current phase(as single updation allowed in single times)
+        user.save();
+      }
 
       res
         .status(200)
-        .json(new ApiResponse(200, team, "Team updated successfully"));
+        .json(new ApiResponse(200, team.players[phase], "Team updated successfully"));
     } catch (error) {
       console.error("Error updating the team for the user", error.message);
       if (error instanceof ApiError) {
@@ -191,6 +211,42 @@ router.put(
         "Something went wrong while updating the team",
         error.message
       );
+    }
+  })
+);
+
+//retrieve latest team for the user
+router.get(
+  "/:teamId",
+  verifyJWT,
+  asyncHandler(async (req, res) => {
+    const { teamId } = req.params;
+    try {
+      const team = await Team.findById(new mongoose.Types.ObjectId(teamId));
+      if (!team) {
+        return res.json(new ApiResponse(404, {}, "No Team found from this id"));
+      }
+      let latestTeamType;
+      if (team.players.final.length !== 0) {
+        latestTeamType = "final";
+      } else if (team.players.semifinal.length !== 0) {
+        latestTeamType = "semifinal";
+      } else {
+        latestTeamType = "knockout";
+      }
+      let latestTeam = team.players[latestTeamType];
+      res
+        .status(201)
+        .json(
+          new ApiResponse(
+            201,
+            { latestTeam },
+            "Retrieved latest team for user successfully"
+          )
+        );
+    } catch (error) {
+      console.error(error);
+      res.status(500).json(new ApiResponse(500, {}, "Failed to retrieve team"));
     }
   })
 );
