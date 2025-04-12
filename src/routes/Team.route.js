@@ -10,6 +10,7 @@ import Tournament from "../models/Tournament.model.js";
 import checkUpdateWindowAndTicket from "../middlewares/checkUpdateWindowAndTicket.js";
 import mongoose from "mongoose";
 import { User } from "../models/User.model.js";
+import { getTeamsByUserId } from "../controllers/tournament.controller.js";
 
 const router = express.Router();
 // Route to create a new team
@@ -250,5 +251,6 @@ router.get(
     }
   })
 );
+router.get("/", verifyJWT, asyncHandler(getTeamsByUserId));
 
 export default router;
