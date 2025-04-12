@@ -6,7 +6,6 @@ import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import mongoose from "mongoose";
 import MatchDetails from "../models/MatchDetails.model.js";
-import Team from "../models/Team.model.js";
 
 export const addNewTournament = asyncHandler(async (req, res) => {
   const {
