@@ -7,6 +7,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import Tournament from "../models/Tournament.model.js";
+import { getTeamsByUserId } from "../controllers/tournament.controller.js";
 import checkUpdateWindowAndConsumeTicket from "../middlewares/checkUpdateWindowAndConsumeTicket.js";
 
 const router = express.Router();
@@ -194,5 +195,8 @@ router.put(
     }
   })
 );
+
+//Route to get teams by user ID
+router.get("/", verifyJWT, asyncHandler(getTeamsByUserId));
 
 export default router;
