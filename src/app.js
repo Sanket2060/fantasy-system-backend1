@@ -30,4 +30,6 @@ import matchDetails from "./routes/MatchDetails.route.js";
 app.use("/api/matchDetails", matchDetails);
 import Leaderboard from "./routes/Leaderboard.route.js";
 app.use("/api/Leaderboard", Leaderboard);
+import UpcomingMatches from "./routes/UpcomingMatch.route.js";
+app.use("/api/upcoming", UpcomingMatches);
 export { app };
