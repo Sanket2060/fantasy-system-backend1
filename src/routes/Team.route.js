@@ -10,7 +10,6 @@ import Tournament from "../models/Tournament.model.js";
 import checkUpdateWindowAndTicket from "../middlewares/checkUpdateWindowAndTicket.js";
 import mongoose from "mongoose";
 import { User } from "../models/User.model.js";
-import { getTeamsByUserId } from "../controllers/tournament.controller.js";
 
 const router = express.Router();
 // Route to create a new team
@@ -251,6 +250,41 @@ router.get(
     }
   })
 );
-router.get("/", verifyJWT, asyncHandler(getTeamsByUserId));
+router.get("/", verifyJWT, asyncHandler(async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    if (!userId) {
+      throw new ApiError(400, "User ID is required");
+    }
+
+    console.log("Fetching teams for user:", userId); // Debug log
+
+    const teams = await Team.find({ userId })
+      .populate({
+        path: "tournamentId",
+        select: "name knockoutStart semifinalStart finalStart",
+      })
+      .populate({
+        path: "players.knockout",
+        select: "name role price playerType photo",
+      });
+
+    console.log("Teams found:", teams); // Debug log
+
+    if (!teams || teams.length === 0) {
+      return res.status(200).json(
+        new ApiResponse(200, [], "No teams found for this user")
+      );
+    }
+
+    res.status(200).json(
+      new ApiResponse(200, teams, "Teams retrieved successfully")
+    );
+  } catch (error) {
+    console.error("Error in getTeamsByUserId:", error); // Detailed error log
+    throw new ApiError(500, error.message || "Failed to fetch teams");
+  }
+}));
 
 export default router;
