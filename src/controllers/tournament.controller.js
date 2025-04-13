@@ -122,7 +122,7 @@ export const getTournamentsByUserIdAdmin = asyncHandler(async (req, res) => {
       throw new ApiError(400, "User ID is required");
     }
 
-    const tournaments = await Tournament.find()
+    const tournaments = await Tournament.find({ createdBy: userId })
       .populate("franchises", "name")
       .select(
         "name rules registrationLimits playerLimitPerTeam knockoutStart semifinalStart finalStart"
