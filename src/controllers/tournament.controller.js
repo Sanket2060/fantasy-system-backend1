@@ -149,10 +149,6 @@ export const getTournamentsByUserIdAdmin = asyncHandler(async (req, res) => {
 // Controller to retrieve tournaments based on user's ID
 export const getAllTournaments = asyncHandler(async (req, res) => {
   try {
-    if (!userId) {
-      throw new ApiError(400, "User ID is required");
-    }
-
     const tournaments = await Tournament.find()
       .populate("franchises", "name")
       .select(
