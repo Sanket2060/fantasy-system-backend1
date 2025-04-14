@@ -5,6 +5,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import mongoose from "mongoose";
 import MatchDetails from "../models/MatchDetails.model.js";
+import Team from "../models/Team.model.js";
 
 export const addNewTournament = asyncHandler(async (req, res) => {
   const {
@@ -138,14 +139,16 @@ export const getTournamentsByUserIdAdmin = asyncHandler(async (req, res) => {
         new ApiResponse(200, tournaments, "Tournaments retrieved successfully")
       );
   } catch (error) {
-    next(error);
+    console.log(`Error somewhere at getTournamentByUserAdmin: ${error}`);
+    if (error instanceof ApiError) {
+      throw new ApiError(error.statusCode, error.message);
+    }
+    throw new ApiError(500, `Error getting tournaments for admin`);
   }
 });
 // Controller to retrieve tournaments based on user's ID
 export const getAllTournaments = asyncHandler(async (req, res) => {
   try {
-    const userId = req.user._id; // Assuming req.user is populated with the authenticated user's details
-
     if (!userId) {
       throw new ApiError(400, "User ID is required");
     }
@@ -166,37 +169,57 @@ export const getAllTournaments = asyncHandler(async (req, res) => {
         new ApiResponse(200, tournaments, "Tournaments retrieved successfully")
       );
   } catch (error) {
-    next(error);
+    console.log(`Error somewhere at retrieving all tournaments: ${error}`);
+    if (error instanceof ApiError) {
+      throw new ApiError(error.statusCode, error.message);
+    }
+    throw new ApiError(500, `Error retrieving tournaments`);
   }
 });
 
-export const getTournamentByUserId=asyncHandler(async (req,res)=>{
+export const getTournamentByUserId = asyncHandler(async (req, res) => {
   try {
-    const userId = req.user._id; // Assuming req.user is populated with the authenticated user's details
+    // if user is admin,return admin can't join tournaments
+    if (req.user.role === "admin") {
+      return res
+        .status(403)
+        .json(new ApiResponse(403, "Admin can't join tournaments"));
+    }
+    const userId = req.user._id;
 
     if (!userId) {
       throw new ApiError(400, "User ID is required");
     }
 
-    const tournaments = await Tournament.find({ createdBy: userId })
+    // Step 1: Find all teams for the user
+    const teams = await Team.find({ userId });
+
+    if (!teams.length) {
+      throw new ApiError(
+        404,
+        "No teams found for the user so not joined in any tournament"
+      );
+    }
+
+    // Step 2: Extract tournament IDs from those teams
+    const tournamentIds = [
+      ...new Set(teams.map((team) => team.tournamentId.toString())),
+    ];
+
+    // Step 3: Find the tournaments using those IDs
+    const tournaments = await Tournament.find({ _id: { $in: tournamentIds } })
       .populate("franchises", "name")
       .select(
         "name rules registrationLimits playerLimitPerTeam knockoutStart semifinalStart finalStart"
       );
-
-    if (!tournaments || tournaments.length === 0) {
-      throw new ApiError(404, "No tournaments registered yet");
-    }
 
     res
       .status(200)
       .json(
         new ApiResponse(200, tournaments, "Tournaments retrieved successfully")
       );
-  } catch (error) {
-    next(error);
-  }
-})
+  } catch (error) {}
+});
 
 // Controller to retrieve franchises based on tournament ID
 export const getFranchisesByTournamentId = asyncHandler(async (req, res) => {
@@ -229,8 +252,11 @@ export const getFranchisesByTournamentId = asyncHandler(async (req, res) => {
         new ApiResponse(200, franchises, "Franchises retrieved successfully")
       );
   } catch (error) {
-    console.error("Error retrieving franchises", error);
-    throw new ApiError(500, "Something went wrong while retrieving franchises");
+    console.log(`Error somewhere at getFranchisesByTournamentId: ${error}`);
+    if (error instanceof ApiError) {
+      throw new ApiError(error.statusCode, error.message);
+    }
+    throw new ApiError(500, `Error getting franchises`);
   }
 });
 
@@ -259,10 +285,12 @@ export const getMatchDetailsByTournamentId = asyncHandler(async (req, res) => {
       .status(200)
       .json(new ApiResponse(200, tournament, "Matches retrieved successfully"));
   } catch (error) {
-    console.error("Error retrieving match details", error);
-    throw new ApiError(
-      500,
-      "Something went wrong while retrieving match details"
+    console.log(
+      `Error somewhere at getting match details by tournament Id: ${error}`
     );
+    if (error instanceof ApiError) {
+      throw new ApiError(error.statusCode, error.message);
+    }
+    throw new ApiError(500, `Error getting match details`);
   }
 });
