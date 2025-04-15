@@ -61,14 +61,16 @@ const checkUpdateWindowAndTicket = async (req, res, next) => {
     }
   } catch (error) {
     if (error instanceof ApiError) {
+      console.log("reached instance of api error");
       res
         .status(error.statusCode)
         .json(new ApiResponse(error.statusCode, {}, error.message));
+    } else {
+      console.error("Error at checkUpdateWindow", error);
+      res.status(500).json({
+        message: "Error checking update window and consuming ticket",
+      });
     }
-    console.error("Error at checkUpdateWindow", error);
-    res.status(500).json({
-      message: "Error checking update window and consuming ticket",
-    });
   }
 };
 
