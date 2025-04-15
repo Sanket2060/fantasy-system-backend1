@@ -130,10 +130,7 @@ router.put(
       // Find the team and ensure it belongs to the authenticated user
       const team = await Team.findOne({ _id: teamId, userId });
       if (!team) {
-        throw new ApiError(
-          404,
-          "Team not found or you do not have permission to edit this team"
-        );
+        throw new ApiError(404, "Team not found");
       }
       console.log("tournamentId", team.tournamentId);
 
