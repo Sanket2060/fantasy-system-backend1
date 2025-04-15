@@ -84,7 +84,7 @@ router.post(
         tournamentId,
       });
 
-      const user = await User.findById({ userId });
+      const user = await User.findById(userId);
       if (user) {
         user.tickets.knockout = false; //false the updation quota for the knockout(as single updation allowed in single times)
         user.save();
@@ -195,7 +195,7 @@ router.put(
       const user = await User.findById(userId);
       if (user) {
         user.tickets[phase] = false; //false the updation quota for the current phase(as single updation allowed in single times)
-        user.save();
+        await user.save();
       }
 
       res
