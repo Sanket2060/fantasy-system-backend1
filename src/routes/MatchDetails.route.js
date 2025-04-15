@@ -143,14 +143,14 @@ router.post(
       if (!match) {
         throw new ApiError(500, "Failed to add match details");
       }
-      // console.log("match", match);
+      console.log("This is what match returns when a match is added", match);
 
       // Add the match to the tournament's matches array and save the tournament
       tournament.matches.push(match[0]._id);
       await tournament.save({ session });
 
       // Fetch all players involved in the match
-      // ⚠️(but this array contains repeatition as playersPlayedTeam1 and goalsScoredBy might contains sam players)
+      // ⚠️✅(but this array contains repeatition as playersPlayedTeam1 and goalsScoredBy might contains sam players)->that's the reason we are taking just playersPlayedTeam1 and playersPlayedTeam2
       // Fetch all players involved in the match
       const allPlayerIds = [
         ...playersPlayedTeam1,
@@ -162,6 +162,8 @@ router.post(
         // ...cardsObtained.red,
         // ...penaltiesMissed,
       ];
+
+      //how efficient is this by matching/finding whole Player database to find the players involved in the match
       const players = await Player.find({
         tournamentId: tournament_id,
         _id: { $in: allPlayerIds },
