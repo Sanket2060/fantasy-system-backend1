@@ -32,4 +32,6 @@ import Leaderboard from "./routes/Leaderboard.route.js";
 app.use("/api/Leaderboard", Leaderboard);
 import UpcomingMatches from "./routes/UpcomingMatch.route.js";
 app.use("/api/upcoming", UpcomingMatches);
+import checkTeamUpdateAbility from "./routes/checkTeamUpdateAbility.route.js";
+app.use("/api/checkTeamUpdateAbility",checkTeamUpdateAbility)
 export { app };
