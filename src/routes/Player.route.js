@@ -246,4 +246,45 @@ router.get(
     }
   })
 );
+
+// Route to retrieve player details by player ID
+router.get(
+  "/:playerId",
+  verifyJWT,
+  asyncHandler(async (req, res) => {
+    try {
+      const { playerId } = req.params;
+      // Validate presence and format of ObjectId
+      if (!playerId || !mongoose.isValidObjectId(playerId)) {
+        throw new ApiError(400, "Invalid or missing Player ID");
+      }
+
+      if (!playerId) {
+        throw new ApiError(400, "Player ID is required");
+      }
+      const player = await Player.findById(playerId)
+        .populate("franchise", "name logo") // optional: only include specific fields
+        .populate("tournamentId", "name year"); // optional: only specific fields
+
+      if (!player) {
+        return res
+          .status(404)
+          .json(new ApiResponse(404, {}, "Player not found"));
+      }
+
+      res.status(200).json(new ApiResponse(200, player));
+    } catch (error) {
+      if (error instanceof ApiError) {
+        // Handle specific API errors
+        return res
+          .status(error.statusCode)
+          .json(new ApiResponse(error.statusCode, null, error.message));
+      } else {
+        // Handle other unexpected errors
+        throw new ApiError(500, "Error while retrieving player details");
+      }
+    }
+  })
+);
+
 export default router;
