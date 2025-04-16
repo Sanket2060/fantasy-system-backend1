@@ -128,7 +128,7 @@ router.patch(
 // Route to retrieve players of a specific tournament with optional filters
 router.get(
   "/:tournamentId/players",
-  verifyJWT,
+  
   asyncHandler(async (req, res) => {
     const { tournamentId } = req.params;
     const { franchiseId, playerType } = req.query;
