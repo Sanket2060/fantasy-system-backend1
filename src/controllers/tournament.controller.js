@@ -189,7 +189,6 @@ export const getTournamentByUserId = asyncHandler(async (req, res) => {
 
     // Step 1: Find all teams for the user
     const teams = await Team.find({ userId });
-
     if (!teams.length) {
       throw new ApiError(
         404,
@@ -214,7 +213,15 @@ export const getTournamentByUserId = asyncHandler(async (req, res) => {
       .json(
         new ApiResponse(200, tournaments, "Tournaments retrieved successfully")
       );
-  } catch (error) {}
+  } catch (error) {
+    console.error("Error at getting tournaments by user Id", error);
+    if (error instanceof ApiError) {
+      return res
+        .status(error.statusCode)
+        .json(new ApiResponse(error.statusCode, error.message));
+    }
+    throw new ApiError(500, `Error while getting tournaments by user Id`);
+  }
 });
 
 // Controller to retrieve franchises based on tournament ID

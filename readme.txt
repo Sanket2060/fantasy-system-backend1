@@ -10,3 +10,5 @@ console.log(myArray); // Output: [1, 2, 3, 3, 4]
 
 To see:
 see about the transaction and session
+
+//jhukkera knockout,semifinal,final tickets haru user ma model vayexa instead of team of that user
