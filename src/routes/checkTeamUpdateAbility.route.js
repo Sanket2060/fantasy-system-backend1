@@ -40,14 +40,19 @@ router.post(
         return res.status(404).json({ message: "User not found" });
       }
       let phase = null;
-      if (currentTime < tournament.knockoutStart && user.tickets.knockout) {
+      if (
+        currentTime >= tournament.knockoutStart &&
+        currentTime < tournament.semifinalStart &&
+        user.tickets.knockout
+      ) {
         phase = "knockout";
       } else if (
-        currentTime < tournament.semifinalStart &&
+        currentTime >= tournament.semifinalStart &&
+        currentTime < tournament.finalStart &&
         user.tickets.semifinal
       ) {
         phase = "semifinal";
-      } else if (currentTime < tournament.finalStart && user.tickets.final) {
+      } else if (currentTime >= tournament.finalStart && user.tickets.final) {
         phase = "final";
       }
 

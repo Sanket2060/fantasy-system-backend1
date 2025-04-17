@@ -122,6 +122,7 @@ router.put(
     const userId = req.user._id; // Assuming user ID is available in req.user
     const phase = req.user.phase; //phase got from checkUpdateWindow middleware
     try {
+      const allPhase = ["knockout", "semifinal", "final"];
       console.log("teamId", teamId);
       if (!teamId) {
         throw new ApiError(400, "Please provide the teamId");
@@ -147,8 +148,23 @@ router.put(
       let updatedPlayers = new Set(
         await team.players[phase].map((player) => player.toString()) //which players knockout,semifinal or final  defined using phase
       );
-      console.log("Initial team before update:", updatedPlayers);
-
+      //if updatePlayers size equals to 0 then match values of allPhase array  to phase and take the value of allPhase array lesser than the matched value until the array is 0 or the size of updatedPlayers is not 0  updatePlayers size matches to requiredPlayerCount go ahead but if updatePlayers!=requiredPlayerCount throw something went wrong
+      // Fallback: If current phase has 0 players, check earlier phases
+      if (updatedPlayers.size === 0) {
+        const currentIndex = allPhase.indexOf(phase);
+        for (let i = currentIndex - 1; i >= 0; i--) {
+          const fallbackPhase = allPhase[i];
+          if (
+            team.players[fallbackPhase] &&
+            team.players[fallbackPhase].length > 0
+          ) {
+            updatedPlayers = new Set(
+              team.players[fallbackPhase].map((player) => player.toString())
+            );
+            break; // stop at first non-empty phase
+          }
+        }
+      }
       // Remove players if specified
       if (removePlayers) {
         removePlayers.forEach((playerId) => updatedPlayers.delete(playerId));
@@ -188,7 +204,7 @@ router.put(
         throw new ApiError(400, "Total budget of players exceeds 100");
       }
 
-      // Update the team players
+      // Update the team players->even if the phase doesn't have players at the moment it takes player from previous phase and sets it at current phase
       team.players[phase] = Array.from(updatedPlayers); //⚠️team.players.teamType(knockout,semifinal,final) defined
       await team.save();
 
