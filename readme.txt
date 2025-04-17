@@ -9,7 +9,6 @@ Built using Node.js, Express, and MongoDB, this backend allows organizers to:
 - Track performance
 - Manage user access and data securely
 
----
 
 ## 🧠 What is This?
 
@@ -86,3 +85,4 @@ REFRESH_TOKEN_EXPIRY=10d
 4. Start the Server
 npm run dev
 Server will run on http://localhost:9005
+
