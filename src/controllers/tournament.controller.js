@@ -291,6 +291,7 @@ export const getMatchDetailsByTournamentId = asyncHandler(async (req, res) => {
     if (error instanceof ApiError) {
       throw new ApiError(error.statusCode, error.message);
     }
+    
     throw new ApiError(500, `Error getting match details`);
   }
 });

@@ -14,9 +14,9 @@ router.post(
   authorizeAdmin,
   asyncHandler(async (req, res) => {
     try {
-      const { matchNumber, matchName, matchDate } = req.body;
+      const { matchNumber, matchName, matchDate ,tournamentId } = req.body;
 
-      if (!matchNumber || !matchName || !matchDate) {
+      if (!matchNumber || !matchName || !matchDate || !tournamentId) {
         throw new ApiError(400, "All fields are required");
       }
 
@@ -25,6 +25,7 @@ router.post(
         matchName,
         matchDate,
         creator: req.user._id,
+        tournamentId,
       });
       await match.save();
 
