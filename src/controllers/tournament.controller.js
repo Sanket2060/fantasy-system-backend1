@@ -190,10 +190,7 @@ export const getTournamentByUserId = asyncHandler(async (req, res) => {
     // Step 1: Find all teams for the user
     const teams = await Team.find({ userId });
     if (!teams.length) {
-      throw new ApiError(
-        404,
-        "No teams found for the user so not joined in any tournament"
-      );
+      throw new ApiError(404, "Not joined in any tournament yet");
     }
 
     // Step 2: Extract tournament IDs from those teams
@@ -214,7 +211,7 @@ export const getTournamentByUserId = asyncHandler(async (req, res) => {
         new ApiResponse(200, tournaments, "Tournaments retrieved successfully")
       );
   } catch (error) {
-    console.error("Error at getting tournaments by user Id", error);
+    console.error("Error at getting tournaments by user Id");
     if (error instanceof ApiError) {
       return res
         .status(error.statusCode)
