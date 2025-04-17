@@ -18,7 +18,12 @@ const upcomingMatchSchema = new mongoose.Schema(
       type:mongoose.Schema.Types.ObjectId,
       ref:"User",
       required:true
-    }
+    },
+    tournamentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Tournament",
+      required: true,
+    },
   },
   { timestamps: true }
 );

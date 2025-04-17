@@ -20,5 +20,5 @@ router.get("/getAllTournaments", getAllTournaments);
 router.get("/franchises/:tournamentId", verifyJWT, getFranchisesByTournamentId);
 
 // Route to get match details by tournament ID
-router.get("/:tournamentId/matches", verifyJWT, getMatchDetailsByTournamentId);
+router.get("/:tournamentId/matches",  getMatchDetailsByTournamentId);
 export default router;
