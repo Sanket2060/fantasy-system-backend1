@@ -74,5 +74,5 @@ const checkUpdateWindowAndTicket = async (req, res, next) => {
   }
 };
 
-//what if ticket is consumed in the middleware but later the updation creates some sort of error?
+//what if ticket is consumed in the middleware but later the updation creates some sort of error?->solved it by handling ticket consumption at controller
 export default checkUpdateWindowAndTicket;

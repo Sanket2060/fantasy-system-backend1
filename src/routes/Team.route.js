@@ -141,11 +141,13 @@ router.put(
       }
 
       const requiredPlayersCount = tournament.playerLimitPerTeam; //to count total players at end
-
+      console.log("phase", phase);
+      console.log("team.players[phase]", team.players[phase]);
       // Initialize updatedPlayers set with existing team players
       let updatedPlayers = new Set(
-        team.players[phase].map((player) => player.toString()) //which players knockout,semifinal or final  defined using phase
+        await team.players[phase].map((player) => player.toString()) //which players knockout,semifinal or final  defined using phase
       );
+      console.log("Initial team before update:", updatedPlayers);
 
       // Remove players if specified
       if (removePlayers) {
@@ -162,9 +164,10 @@ router.put(
             "One or more player IDs to be added are invalid"
           );
         }
-        addPlayers.forEach((playerId) => updatedPlayers.add(playerId));
+        await addPlayers.forEach((playerId) => updatedPlayers.add(playerId));
       }
       console.log("Final updated list:", updatedPlayers);
+      console.log("Updated players size:", updatedPlayers.size);
       // Validate the number of players
       if (updatedPlayers.size !== requiredPlayersCount) {
         throw new ApiError(
