@@ -87,5 +87,6 @@ npm run dev
 Server will run on http://localhost:9005
 
 5.Frontend repo to this app:
+https://github.com/Sanket2060/fantasy-sports-app
 
 
